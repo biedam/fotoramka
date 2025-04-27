@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="/script.js" defer></script>
+  </head>
+
+  <body>
+    <div id="calaStrona">
+      <div id="nwm">
+        <h1>
+          Galeria Zdjęć Biedów
+        </h1>
+      </div>
+    <div id="naglowek">
+    
+    </div>
+    
+    <div id="nawigacja">
+        <ul>
+          
+          <li class="main-menu"><a href="/"> Strona główna</a></li>
+          
+          <li class="main-menu"><a href="/dodaj"> Dodaj Zdjęcie </a></li>
+          
+          <li class="main-menu"><a href="ustawienia.html"> Ustawienia </a></li>
+          
+        </ul>
+      
+      </div>
+      
+      <div id="dodawanie">
+      
+        <input type="file" id="fileInput"/>
+        <input type="text" placeholder="Podaj Opis Zdjęcia" id="descriptionInput"/>
+        <input type="submit" onclick="uploadFile()" />
+      
+      <progress id="progressBar" value="0" max="100"></progress>
+      <p id="status">jakis tekst</p>
+      </div>
+      
+    </div>
+    
+    <script>
+      function uploadFile() {
+          let fileInput = document.getElementById("fileInput");
+          let file = fileInput.files[0];
+          if (!file) {
+              alert("Wybierz zdjęcie do wysłania");
+              return;
+          }
+
+          let description = document.getElementById("descriptionInput").value;
+
+          let formData = new FormData();
+          formData.append("file", file);
+          formData.append("description", description);
+
+          let xhr = new XMLHttpRequest();
+          xhr.open("POST", "/upload", true);
+
+          xhr.upload.onprogress = function(event) {
+              if (event.lengthComputable) {
+                  let percentComplete = (event.loaded / event.total) * 100;
+                  document.getElementById("progressBar").value = percentComplete;
+              }
+          };
+
+          xhr.onload = function() {
+              if (xhr.status === 200) {
+                  document.getElementById("status").innerText = "Zdjęcie wysłane!";
+              } else {
+                  document.getElementById("status").innerText = "Błąd wysyłania";
+              }
+          };
+
+          xhr.send(formData);
+      }
+    </script>
+
+      </body>
+</html>
