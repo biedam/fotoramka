@@ -27,7 +27,7 @@
 # THE SOFTWARE.
 #
 import time
-import epdconfig
+from . import epdconfig
 
 import PIL
 from PIL import Image
