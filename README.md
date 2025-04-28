@@ -10,3 +10,5 @@
    ```shepp
    wget -qO- https://raw.githubusercontent.com/Botspot/pi-apps/master/install | bash
    ```
+5. Setup RPi to use EPD screen https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+_(E)_Manual#Raspberry_Pi
+ 
