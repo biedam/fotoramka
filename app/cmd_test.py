@@ -61,18 +61,18 @@ def main():
     parser.add_argument('-display', action='store_true', help='Display image on EPD')
     parser.add_argument('-dither', type=int, help='Dithering level (eg. 80)')
     parser.add_argument('-annotate', type=str, help='Annotate image with text')
-    parser.add_argument('image_path', type=str, help='Path to image file')
+    parser.add_argument('-f', type=str, help='Path to image file')
 
     args = parser.parse_args()
 
     if args.clear:
         epd_clear()
     elif args.display:
-        disp_img(args.image_path)
+        disp_img(args.f)
     elif args.dither:
-        img_dither(args.dither, args.image_path)
+        img_dither(args.dither, args.f)
     elif args.annotate:
-        img_annotate(args.annotate, args.image_path)
+        img_annotate(args.annotate, args.f)
     else:
         parser.print_help()
 
