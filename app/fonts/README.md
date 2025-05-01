@@ -1,0 +1,1 @@
+Excalifont is hand-drawn font used to annotate images in fotoramka app. It is availble under MIT license here: https://plus.excalidraw.com/excalifont

@@ -47,12 +47,33 @@ def disp_img(path):
         epd.sleep()
 
 def img_dither(dither_amout, file_path):
+    start_time = time.time()
     img = Photo(file_path)
     img.dither(dither_amout)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"🕒 Execution time: {elapsed_time:.2f} s")
 
 def img_annotate(text, file_path):
+    start_time = time.time()
     img = Photo(file_path)
     img.annotate('South',80,text)
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"🕒 Execution time: {elapsed_time:.2f} s")
+
+def img_resize(file_path):
+    start_time = time.time()
+    img = Photo(file_path)
+    img.resize("resized.jpg")
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"🕒 Execution time: {elapsed_time:.2f} s")
+
+def img_get_exif(file_path):
+    img = Photo(file_path)
+    img.get_exif()
+
 
 def main():
     parser = argparse.ArgumentParser(description="Command line interface for Fotoramka APP - for test&debug", add_help=True)
@@ -62,6 +83,8 @@ def main():
     parser.add_argument('-dither', type=int, help='Dithering level (eg. 80)')
     parser.add_argument('-annotate', type=str, help='Annotate image with text')
     parser.add_argument('-f', type=str, help='Path to image file')
+    parser.add_argument('-resize', action='store_true', help='Resize and crop the image')
+    parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
 
     args = parser.parse_args()
 
@@ -73,6 +96,10 @@ def main():
         img_dither(args.dither, args.f)
     elif args.annotate:
         img_annotate(args.annotate, args.f)
+    elif args.resize:
+        img_resize(args.f)
+    elif args.exif:
+        img_get_exif(args.f)
     else:
         parser.print_help()
 
