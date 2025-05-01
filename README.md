@@ -9,6 +9,7 @@
 5. Install needed packages:
    ```shell
    sudo apt install imagemagick
+   pip3 install pycountry babel reverse_geocoder --break-system-packages
    ```
 6. Optionally for better stability with remote VSCode server increase SWAP size:
    - Stop the swap service `sudo dphys-swapfile swapoff`
@@ -17,3 +18,8 @@
    - Reinitialize the swap file `sudo dphys-swapfile setup`
    - Start the swap service `sudo dphys-swapfile swapon`
    - Reboot
+
+7. Install Excalifont:
+   - `mkdir -p ~/.local/share/fonts`
+   - `cp fotoramka/app/fonts/Excalifont-Regular.ttf ~/.local/share/fonts/`
+   - update font cache `fc-cache -fv`

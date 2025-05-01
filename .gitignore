@@ -1,4 +1,4 @@
 # Byte-compiled
 __pycache__/
 test_img/
-img.png
+/app/img.png
