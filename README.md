@@ -1,3 +1,5 @@
+# Color E-ink Photoframe
+
 ## Installation
 
 1. Install latest Raspberry pi OS (lite version) preferably using Raspberry Pi imager
@@ -23,3 +25,14 @@
    - `mkdir -p ~/.local/share/fonts`
    - `cp fotoramka/app/fonts/Excalifont-Regular.ttf ~/.local/share/fonts/`
    - update font cache `fc-cache -fv`
+
+## JPEG image quality
+
+Fotoramka stores jpeg images resized & cropped to EPD screen resolution (1600x1200). Depending on quality setting, average image size will vary.
+
+|JPEG quality|File size [KB]|
+|------------|--------------|
+|100         |1390          |
+|98          |1010          |
+|95          |714           |
+|90          |481           |

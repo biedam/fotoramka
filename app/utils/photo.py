@@ -1,3 +1,12 @@
+#=============================================================================
+#============================ FOTORAMKA project ==============================
+#=============================================================================
+# author            : biedam
+# notes             : 
+# license           : MIT
+#=============================================================================
+
+
 # TODO:
 # After image upload:
 # - read image orientation
@@ -17,6 +26,11 @@ import pycountry
 from babel.dates import format_datetime
 from babel import Locale
 from datetime import datetime
+from enum import Enum
+
+class Orientation(Enum):
+    HORIZONTAL = 1
+    VERTICAL = 2
 
 class Photo:
     def __init__(self, image_path):
@@ -34,8 +48,8 @@ class Photo:
         file_in = self.processing_path
         file_out = self.processing_path
         font = "Excalifont-Regular"
-        partial_cmd = ['-gravity', position, '-font', font, '-pointsize', f'{font_size}', '-annotate', '0', f"\'{text}\'"]
-        annotation_command = ['convert', file_in, '-strokewidth', '3', '-stroke', 'black'] + partial_cmd + ['-fill', 'white', '-strokewidth', '1', '-stroke', 'white'] + partial_cmd + [file_out]
+        partial_cmd = ['-gravity', position, '-font', font, '-pointsize', f'{font_size}', '-annotate', '0', text]
+        annotation_command = ['convert', file_in, '-strokewidth', '5', '-stroke', 'black'] + partial_cmd + ['-fill', 'white', '-strokewidth', '1', '-stroke', 'white'] + partial_cmd + [file_out]
         subprocess.run(annotation_command, check=True)
 
     polish_months_nominative = {
@@ -106,28 +120,40 @@ class Photo:
             readable_date = None
             if date_string:
                 dt = datetime.strptime(date_string, "%Y:%m:%d %H:%M:%S")
-                readable_date = format_datetime(dt, "d MMMM y", locale='pl_PL')
+                long_date = format_datetime(dt, "d MMMM y", locale='pl_PL')
                 month_name = self.polish_months_nominative[dt.month]
-                readable_date_short = f"{month_name} {dt.year}"
-
-            print("EXIF Data:", {
-                "Data": readable_date,
-                "Data krótka": readable_date_short,
-                "Country": country_name,
-                "Location": photo_location
-            })
+                short_date = f"{month_name} {dt.year}"
 
             return {
-                "DateTime": exif.get("DateTime"),
-                "Latitude": latitude,
-                "Longitude": longitude,
-                "Country": country
+                "LongDate": long_date,
+                "ShortDate": short_date,
+                "Country": country_name,
+                "Location": photo_location
             }
 
     def resize(self, out_path=None, jpg_quality=95):
         #resize and crop to 2:3 aspect ratio
         print("resize start")
         with Image.open(self.image_path) as img:
+            # Handle orientation from EXIF
+            try:
+                exif = img._getexif()
+                if exif is not None:
+                    for tag, value in exif.items():
+                        decoded = TAGS.get(tag, tag)
+                        if decoded == "Orientation":
+                            orientation = value
+                            if orientation == 3:
+                                img = img.rotate(180, expand=True)
+                            elif orientation == 6:
+                                img = img.rotate(270, expand=True)
+                            elif orientation == 8:
+                                img = img.rotate(90, expand=True)
+                            break
+            except Exception as e:
+                print(f"Could not handle EXIF orientation: {e}")
+
+            orientation = none
             width, height = img.size
             #preserve EXIF data
             exif = img.info['exif']
@@ -135,6 +161,7 @@ class Photo:
             target_width = 1600
             target_height = 1200
             if width > height: # horizontal photo
+                orientation = Orientation.HORIZONTAL
                 # preserve aspcect ratio
                 new_height = target_height
                 new_width = int((width / height) * target_height)
@@ -146,6 +173,7 @@ class Photo:
                 right = (new_width + target_width) / 2
                 
             else: # vertical photo
+                orientation = Orientation.VERTICAL
                 # preserve aspcect ratio & swith width and heigth
                 new_width = target_height
                 new_height = int((height / width) * target_height)
@@ -164,6 +192,8 @@ class Photo:
             img = img.crop((left, top, right, bottom))
 
             if out_path is not None:
-                img.save(out_path, quality=jpg_quality, exif=exif)
+                img.save(out_path, quality=jpg_quality)
             else:
-                img.save(self.image_paht, quality=jpg_quality, exif=exif)
+                img.save(self.image_paht, quality=jpg_quality)
+
+            return orientation

@@ -57,7 +57,7 @@ def img_dither(dither_amout, file_path):
 def img_annotate(text, file_path):
     start_time = time.time()
     img = Photo(file_path)
-    img.annotate('South',80,text)
+    img.annotate('South',40,text)
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"🕒 Execution time: {elapsed_time:.2f} s")
@@ -72,7 +72,8 @@ def img_resize(file_path):
 
 def img_get_exif(file_path):
     img = Photo(file_path)
-    img.get_exif()
+    exif_data = img.get_exif()
+    print(exif_data)
 
 
 def main():
