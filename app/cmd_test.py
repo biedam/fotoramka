@@ -5,6 +5,7 @@ from epd_drv import epd13in3E
 from PIL import Image
 import time
 from utils.photo import Photo
+from utils.frame import Frame
 
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 
@@ -75,6 +76,13 @@ def img_get_exif(file_path):
     exif_data = img.get_exif()
     print(exif_data)
 
+def orientation():
+    frm = Frame()
+    frm.orientation()
+
+def rotate(direction):
+    frm = Frame()
+    frm.rotate(direction)
 
 def main():
     parser = argparse.ArgumentParser(description="Command line interface for Fotoramka APP - for test&debug", add_help=True)
@@ -86,6 +94,8 @@ def main():
     parser.add_argument('-f', type=str, help='Path to image file')
     parser.add_argument('-resize', action='store_true', help='Resize and crop the image')
     parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
+    parser.add_argument('-angle', action='store_true', help='Get frame orientation')
+    parser.add_argument('-rotate', type=float, help='Rotate frame')
 
     args = parser.parse_args()
 
@@ -101,6 +111,10 @@ def main():
         img_resize(args.f)
     elif args.exif:
         img_get_exif(args.f)
+    elif args.angle:
+        orientation()
+    elif args.rotate:
+        rotate(args.rotate)
     else:
         parser.print_help()
 

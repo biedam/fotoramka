@@ -6,12 +6,14 @@
 2. Connect via SSH, run sudo raspi-config and setup following options:
    - System/autologin - as desktop user - usefull for debugging and connecting remotely
    - Advanced/expand filesystem
+   - Interface/I2C Enable
 3. Install RPi Connect https://www.raspberrypi.com/documentation/services/connect.html
 4. Setup RPi to use EPD screen https://www.waveshare.com/wiki/13.3inch_e-Paper_HAT+_(E)_Manual#Raspberry_Pi
 5. Install needed packages:
    ```shell
    sudo apt install imagemagick
    pip3 install pycountry babel reverse_geocoder --break-system-packages
+   sudo apt-get install python3-smbus
    ```
 6. Optionally for better stability with remote VSCode server increase SWAP size:
    - Stop the swap service `sudo dphys-swapfile swapoff`
@@ -25,6 +27,11 @@
    - `mkdir -p ~/.local/share/fonts`
    - `cp fotoramka/app/fonts/Excalifont-Regular.ttf ~/.local/share/fonts/`
    - update font cache `fc-cache -fv`
+
+## BOM
+- Raspberry PI Zero 2W
+- Gravity: I2C LIS2DW12 Triple Axis Accelerometer Sensor https://www.dfrobot.com/product-2348.html
+- Servo 360: Feetech FS90R - micro https://www.pololu.com/product/2820/faqs
 
 ## JPEG image quality
 
