@@ -10,16 +10,24 @@ from .DFRobot_LIS2DW12 import *
 import time
 import sys
 import numpy as np
-from gpiozero import Servo
+#from gpiozero.pins.pigpio import PiGPIOFactory
+#from gpiozero import Servo
+import pigpio
 
 I2C_BUS         = 0x01             #default use I2C1
 IMU_ADDRESS     = 0x19             #sensor address 1
-SERVO_GPIO      = 18               #GPIO with PWM: 12,13,18,19
+SERVO_GPIO      = 12               #GPIO with PWM: 12,13,18,19
 
+#servo zero position is betwean pulsewidth 1430 - 1490, midpoint 1460
+#using rotation +/- 50 from midpoint (1410 and 1510) rotation for 90 deg takes about 12s
 
 imu = DFRobot_IIS2DLPC_I2C(I2C_BUS ,IMU_ADDRESS)
-servo = Servo(SERVO_GPIO)
+#use PiGPIO daemon library to reduce sevo jitter
+#my_factory = PiGPIOFactory()
 
+#servo = Servo(SERVO_GPIO, pin_factory=my_factory)
+gpio = pigpio.pi()
+gpio.set_mode(SERVO_GPIO, pigpio.OUTPUT)
 
 class Frame:
     
@@ -44,9 +52,16 @@ class Frame:
         return angle
 
     def rotate(self, direction):
-        servo.value = direction
-        time.sleep(0.5)
-        servo.value = 0
+        #servo.value = 0
+        #servo.value = direction
+        #time.sleep(0.5)
+        #servo.value = 0
+        gpio.set_servo_pulsewidth(SERVO_GPIO, direction)  # środek
+        time.sleep(1)
+        gpio.set_servo_pulsewidth(SERVO_GPIO, 1500)  # "prawa"
+        # wyłącz serwo
+        gpio.set_servo_pulsewidth(SERVO_GPIO, 0)
+        gpio.stop()
 
             
 
