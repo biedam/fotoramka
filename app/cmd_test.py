@@ -26,6 +26,7 @@ def epd_clear():
 
 def disp_img(path):
     print(f"Display image: {path}")
+    start_time = time.time()
     try:
         epd.Init()
         print("clearing...")
@@ -36,7 +37,7 @@ def disp_img(path):
 
         # read bmp file 
         print("2.read bmp file")
-        Himage = Image.open(os.path.join(picdir, 'test2.jpg'))
+        Himage = Image.open(path)
         epd.display(epd.getbuffer(Himage))
         time.sleep(3)
 
@@ -46,6 +47,9 @@ def disp_img(path):
     except:
         print("goto sleep...")
         epd.sleep()
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"🕒 Execution time: {elapsed_time:.2f} s")
 
 def img_dither(dither_amout, file_path):
     start_time = time.time()
@@ -66,10 +70,12 @@ def img_annotate(text, file_path):
 def img_resize(file_path):
     start_time = time.time()
     img = Photo(file_path)
-    img.resize("resized.jpg")
+    orient = img.resize("resized.jpg")
+    #orient = img.resize(file_path)
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"🕒 Execution time: {elapsed_time:.2f} s")
+    print(orient)
 
 def img_get_exif(file_path):
     img = Photo(file_path)

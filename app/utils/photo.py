@@ -153,7 +153,7 @@ class Photo:
             except Exception as e:
                 print(f"Could not handle EXIF orientation: {e}")
 
-            orientation = none
+            orientation = None
             width, height = img.size
             #preserve EXIF data
             exif = img.info['exif']
