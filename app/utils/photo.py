@@ -27,25 +27,46 @@ from babel.dates import format_datetime
 from babel import Locale
 from datetime import datetime
 from enum import Enum
+from epd_drv import epd13in3E
 
 class Orientation(Enum):
     HORIZONTAL = 1
     VERTICAL = 2
 
+epd = epd13in3E.EPD()
+
+PALETTE_VAL1 = (0,0,0,  255,255,255,  255,255,0,  255,0,0,  0,0,0,  0,0,255,  0,255,0) + (0,0,0)*249
+PALETTE_VAL2 = (0,0,0,  255,255,255,  244,244,0,  126,10,28,  0,0,0,  75,66,189,  68,145,66) + (0,0,0)*249
+
+utils_dir = Path(__file__).parent
+PALETTE_FILE1 = utils_dir / "palette.bmp"
+PALETTE_FILE2 = utils_dir / "palette3.bmp"
+
+
+
 class Photo:
+    #RGB palette
+    PALETTE1 = (PALETTE_VAL1, PALETTE_FILE1)
+    #Calibrated palette
+    PALETTE2 = (PALETTE_VAL2, PALETTE_FILE2)
+
     def __init__(self, image_path):
         self.image_path = image_path
         utils_dir = Path(__file__).parent
-        self.dither_palette = utils_dir / "palette.bmp"
         self.processing_path = "img.png"
+        self.palette = None
+
+    def set_palette(self, palette):
+        self.palette = palette
 
     def dither(self, diffusion):
         diffusion_amount = f"dither:diffusion-amount={diffusion}%"
-        dither_command = ['convert', self.image_path, '-dither', 'FloydSteinberg', '-define', diffusion_amount, '-remap', self.dither_palette, '-type', 'truecolor', self.processing_path]
+        dither_palette = f"{self.palette[1]}"
+        dither_command = ['convert', self.image_path, '-dither', 'FloydSteinberg', '-define', diffusion_amount, '-remap', dither_palette, '-type', 'truecolor', self.processing_path]
         subprocess.run(dither_command, check=True)
 
     def annotate(self, position, font_size, text):
-        file_in = self.processing_path
+        file_in = self.image_path
         file_out = self.processing_path
         font = "Excalifont-Regular"
         partial_cmd = ['-gravity', position, '-font', font, '-pointsize', f'{font_size}', '-annotate', '0', text]
@@ -197,3 +218,62 @@ class Photo:
                 img.save(self.image_paht, quality=jpg_quality)
 
             return orientation
+
+    def display(self, path):
+        try:
+            epd.Init()
+            print("clearing...")
+
+            # Drawing on the image
+            print("1.Drawing on the image...")
+            image = Image.new('RGB', (epd.width, epd.height), epd.WHITE)  # 255: clear the frame
+            # read bmp file 
+            print("2.read bmp file")
+            image = Image.open(path)
+            print("test")
+            pal_image = Image.new("P", (1,1))
+            pal_image.putpalette(self.palette[0])
+            print("test")
+            # Check if we need to rotate the image
+            imwidth, imheight = image.size
+            print(imwidth)
+            if(imwidth == epd.width and imheight == epd.height):
+                image_temp = image
+            elif(imwidth == epd.height and imheight == epd.width):
+                image_temp = image.rotate(90, expand=True)
+            else:
+                print("Invalid image dimensions: %d x %d, expected %d x %d" % (imwidth, imheight, epd.width, epd.height))
+
+            # Convert the soruce image to the 7 colors, dithering if needed
+            image_7color = image_temp.convert("RGB").quantize(palette=pal_image)
+            buf_7color = bytearray(image_7color.tobytes('raw'))
+
+            # PIL does not support 4 bit color, so pack the 4 bits of color
+            # into a single byte to transfer to the panel
+            buf = [0x00] * int(epd.width * epd.height / 2)
+            idx = 0
+            for i in range(0, len(buf_7color), 2):
+                buf[idx] = (buf_7color[i] << 4) + buf_7color[i+1]
+                idx += 1
+
+            epd.display(buf)
+            time.sleep(3)
+
+
+            print("goto sleep...")
+            epd.sleep()
+        except:
+            print("goto sleep...")
+            epd.sleep()
+    def clear(self):
+        try:
+            epd.Init()
+            print("clearing...")
+            epd.Clear()
+            time.sleep(3)
+            print("goto sleep...")
+            epd.sleep()
+            print("EPD cleared")
+        except:
+            print("goto sleep...")
+            epd.sleep()    

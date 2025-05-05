@@ -1,7 +1,7 @@
 import argparse
 import sys
 import os
-from epd_drv import epd13in3E
+#from epd_drv import epd13in3E
 from PIL import Image
 import time
 from utils.photo import Photo
@@ -9,44 +9,18 @@ from utils.frame import Frame
 
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 
-epd = epd13in3E.EPD()
+#epd = epd13in3E.EPD()
 
 def epd_clear():
-    try:
-        epd.Init()
-        print("clearing...")
-        epd.Clear()
-        time.sleep(3)
-        print("goto sleep...")
-        epd.sleep()
-        print("EPD cleared")
-    except:
-        print("goto sleep...")
-        epd.sleep()
+    img = Photo("")
+    img.clear()
 
 def disp_img(path):
     print(f"Display image: {path}")
     start_time = time.time()
-    try:
-        epd.Init()
-        print("clearing...")
-
-        # Drawing on the image
-        print("1.Drawing on the image...")
-        Himage = Image.new('RGB', (epd.width, epd.height), epd.WHITE)  # 255: clear the frame
-
-        # read bmp file 
-        print("2.read bmp file")
-        Himage = Image.open(path)
-        epd.display(epd.getbuffer(Himage))
-        time.sleep(3)
-
-
-        print("goto sleep...")
-        epd.sleep()
-    except:
-        print("goto sleep...")
-        epd.sleep()
+    img = Photo(path)
+    img.set_palette(img.PALETTE2)
+    img.display(path)
     end_time = time.time()
     elapsed_time = end_time - start_time
     print(f"🕒 Execution time: {elapsed_time:.2f} s")
@@ -54,6 +28,7 @@ def disp_img(path):
 def img_dither(dither_amout, file_path):
     start_time = time.time()
     img = Photo(file_path)
+    img.set_palette(img.PALETTE2)
     img.dither(dither_amout)
     end_time = time.time()
     elapsed_time = end_time - start_time

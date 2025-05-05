@@ -74,3 +74,10 @@ Fotoramka stores jpeg images resized & cropped to EPD screen resolution (1600x12
 |98          |1010          |
 |95          |714           |
 |90          |481           |
+
+## Image colors
+
+R (126,10,28)
+G (68,145,66)
+B (75,66,189)
+Y (244,244,0)
