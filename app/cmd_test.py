@@ -6,6 +6,9 @@ from PIL import Image
 import time
 from utils.photo import Photo
 from utils.frame import Frame
+import logging
+
+logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
 
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 
@@ -66,6 +69,7 @@ def rotate(direction):
     frm.rotate(direction)
 
 def main():
+    logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser(description="Command line interface for Fotoramka APP - for test&debug", add_help=True)
 
     parser.add_argument('-clear', action='store_true', help='Clear EPD screen')
@@ -98,6 +102,8 @@ def main():
         rotate(args.rotate)
     else:
         parser.print_help()
+
+    logging.info('Watch out!')
 
 if __name__ == "__main__":
     main()

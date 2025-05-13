@@ -28,6 +28,9 @@ from babel import Locale
 from datetime import datetime
 from enum import Enum
 from epd_drv import epd13in3E
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Orientation(Enum):
     HORIZONTAL = 1
@@ -89,6 +92,7 @@ class Photo:
     }
 
     def get_exif(self):
+        logger.info("exif start")
         print("exif start")
         with Image.open(self.image_path) as img:
             exif_data = img._getexif()
