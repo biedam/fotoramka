@@ -4,7 +4,7 @@ import os
 #from epd_drv import epd13in3E
 from PIL import Image
 import time
-from utils.photo import Photo
+from utils.photo import Photo, Orientation
 from utils.frame import Frame
 import logging
 
@@ -62,11 +62,15 @@ def img_get_exif(file_path):
 
 def orientation():
     frm = Frame()
-    frm.orientation()
+    logging.info(f"angle = {frm.orientation()}")
 
 def rotate(direction):
     frm = Frame()
-    frm.rotate(direction)
+    if direction == "H":
+        angle = Orientation.HORIZONTAL
+    elif direction == "V":
+        angle = Orientation.VERTICAL
+    frm.rotate(angle)
 
 def main():
     logger = logging.getLogger(__name__)
@@ -80,7 +84,7 @@ def main():
     parser.add_argument('-resize', action='store_true', help='Resize and crop the image')
     parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
     parser.add_argument('-angle', action='store_true', help='Get frame orientation')
-    parser.add_argument('-rotate', type=float, help='Rotate frame')
+    parser.add_argument('-rotate', type=str, help='Rotate frame')
 
     args = parser.parse_args()
 
