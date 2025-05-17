@@ -15,6 +15,7 @@
    pip3 install pycountry babel reverse_geocoder --break-system-packages
    sudo apt install python3-smbus
    sudo apt install python3-flask
+   sudp apt install python3-peewee
    ```
 
 6. Fotoramka uses pgpio for controlling servo. This library uses daemon, which have to be started at startpu:

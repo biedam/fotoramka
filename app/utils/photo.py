@@ -149,16 +149,18 @@ class Photo:
                 month_name = self.polish_months_nominative[dt.month]
                 short_date = f"{month_name} {dt.year}"
 
-            return {
+            self.exif = {
                 "LongDate": long_date,
                 "ShortDate": short_date,
                 "Country": country_name,
                 "Location": photo_location
             }
 
-    def resize(self, out_path=None, jpg_quality=95):
+            return self.exif
+
+    def resize(self, out_path=None, jpg_quality=95, target_width = 1600, target_height = 1200, thumbnail = False):
         #resize and crop to 2:3 aspect ratio
-        print("resize start")
+        logging.info("Resize image")
         with Image.open(self.image_path) as img:
             # Handle orientation from EXIF
             try:
@@ -176,17 +178,18 @@ class Photo:
                                 img = img.rotate(90, expand=True)
                             break
             except Exception as e:
-                print(f"Could not handle EXIF orientation: {e}")
+                logging.error(f"Could not handle EXIF orientation: {e}")
 
-            orientation = None
+            if thumbnail == False:
+                self.orientation = None
             width, height = img.size
             #preserve EXIF data
             exif = img.info['exif']
             print(img.size)
-            target_width = 1600
-            target_height = 1200
+            
             if width > height: # horizontal photo
-                orientation = Orientation.HORIZONTAL
+                if thumbnail == False:
+                    self.orientation = Orientation.HORIZONTAL
                 # preserve aspcect ratio
                 new_height = target_height
                 new_width = int((width / height) * target_height)
@@ -198,7 +201,8 @@ class Photo:
                 right = (new_width + target_width) / 2
                 
             else: # vertical photo
-                orientation = Orientation.VERTICAL
+                if thumbnail == False:
+                    self.orientation = Orientation.VERTICAL
                 # preserve aspcect ratio & swith width and heigth
                 new_width = target_height
                 new_height = int((height / width) * target_height)
@@ -210,18 +214,25 @@ class Photo:
                 left = 0
                 right = new_width
 
-            print((new_width, new_height))
+            logging.info((new_width, new_height))
             # resize
             img = img.resize((new_width, new_height), Image.LANCZOS)
             # crop
             img = img.crop((left, top, right, bottom))
 
+            
             if out_path is not None:
                 img.save(out_path, quality=jpg_quality)
+                if thumbnail == True:
+                    self.thumb_path = out_path
             else:
-                img.save(self.image_paht, quality=jpg_quality)
+                if thumbnail == False:
+                    img.save(self.image_path, quality=jpg_quality)
+                else:
+                    image_path = Paht(self.image_path)
+                    self.thumb_path = image_path.with_name(f"{image_path.stem}_thumb{image_path.suffix}")
 
-            return orientation
+            return self.orientation
 
     def display(self, path):
         try:
