@@ -48,6 +48,7 @@ def img_annotate(text, file_path):
 def img_resize(file_path):
     start_time = time.time()
     img = Photo(file_path)
+    orient = img.resize(target_width = 640, target_height = 480, thumbnail = True)
     orient = img.resize("resized.jpg")
     #orient = img.resize(file_path)
     end_time = time.time()

@@ -159,7 +159,8 @@ class Photo:
             return self.exif
 
     def resize(self, out_path=None, jpg_quality=95, target_width = 1600, target_height = 1200, thumbnail = False):
-        #resize and crop to 2:3 aspect ratio
+        # resolution for thumbnails can be 320 x 240
+        # resize and crop to 2:3 aspect ratio
         logging.info("Resize image")
         with Image.open(self.image_path) as img:
             # Handle orientation from EXIF
@@ -188,8 +189,7 @@ class Photo:
             print(img.size)
             
             if width > height: # horizontal photo
-                if thumbnail == False:
-                    self.orientation = Orientation.HORIZONTAL
+                _orientation = Orientation.HORIZONTAL
                 # preserve aspcect ratio
                 new_height = target_height
                 new_width = int((width / height) * target_height)
@@ -201,8 +201,7 @@ class Photo:
                 right = (new_width + target_width) / 2
                 
             else: # vertical photo
-                if thumbnail == False:
-                    self.orientation = Orientation.VERTICAL
+                _orientation = Orientation.VERTICAL
                 # preserve aspcect ratio & swith width and heigth
                 new_width = target_height
                 new_height = int((height / width) * target_height)
@@ -222,17 +221,23 @@ class Photo:
 
             
             if out_path is not None:
+                logging.info(f"saving resized image {out_path}")
                 img.save(out_path, quality=jpg_quality)
                 if thumbnail == True:
                     self.thumb_path = out_path
             else:
                 if thumbnail == False:
+                    logging.info(f"saving resized image {out_path}")
                     img.save(self.image_path, quality=jpg_quality)
                 else:
-                    image_path = Paht(self.image_path)
+                    image_path = Path(self.image_path)
                     self.thumb_path = image_path.with_name(f"{image_path.stem}_thumb{image_path.suffix}")
+                    logging.info(f"saving resized image {self.thumb_path}")
+                    img.save(self.thumb_path, quality=jpg_quality)
 
-            return self.orientation
+            if thumbnail == False:
+                self.orientation = _orientation
+            return _orientation
 
     def display(self, path):
         try:
