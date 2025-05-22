@@ -6,6 +6,10 @@ from PIL import Image
 import time
 from utils.photo import Photo, Orientation
 from utils.frame import Frame
+from utils.photoalbum import PhotoAlbum, initdb
+from pathlib import Path
+from uuid import uuid4
+import shutil
 import logging
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
@@ -13,6 +17,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 
 #epd = epd13in3E.EPD()
+UPLOAD_FOLDER = 'photos'
 
 def epd_clear():
     img = Photo("")
@@ -73,6 +78,34 @@ def rotate(direction):
         angle = Orientation.VERTICAL
     frm.rotate(angle)
 
+def add(file_path, file_description):
+    logging.info(f"start processing file {file_path}")
+    logging.info(f"description: {file_description}")
+    path = Path(file_path)
+    original_filename = path.stem
+    target_path = Path(UPLOAD_FOLDER) / f"{uuid4().__str__()}{path.suffix}"
+    logging.info(f"original_filename {original_filename}")
+    logging.info(f"target path {target_path}")
+    shutil.copy2(file_path, target_path) #replace with shutil.move
+
+    img = Photo(
+        image_path = target_path, 
+        filename = original_filename, 
+        description = file_description)
+
+    exif_data = img.get_exif()
+    logging.info(f'Get EXIF data: {exif_data}')
+    logging.info('Generate thumbnail')
+    img.resize(target_width = 640, target_height = 480, thumbnail = True)
+    logging.info('Resize image')
+    img.resize()
+    logging.info('Add to database')
+    album = PhotoAlbum()
+    album.add(img)
+    #print('Processing finished!')
+    #print(exif_data)
+    #print(img_orientation)
+
 def main():
     logger = logging.getLogger(__name__)
     parser = argparse.ArgumentParser(description="Command line interface for Fotoramka APP - for test&debug", add_help=True)
@@ -86,6 +119,9 @@ def main():
     parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
     parser.add_argument('-angle', action='store_true', help='Get frame orientation')
     parser.add_argument('-rotate', type=str, help='Rotate frame')
+    parser.add_argument('-add', type=str, help='Add picture to database')
+    parser.add_argument('-initdb', action='store_true', help='Initialise database')
+    parser.add_argument('-listdb', action='store_true', help='List database')
 
     args = parser.parse_args()
 
@@ -105,10 +141,17 @@ def main():
         orientation()
     elif args.rotate:
         rotate(args.rotate)
+    elif args.add:
+        add(args.f,args.add)
+    elif args.initdb:
+        initdb()
+    elif args.listdb:
+        album = PhotoAlbum()
+        album.list_all()
     else:
         parser.print_help()
 
-    logging.info('Watch out!')
+    logging.info('END')
 
 if __name__ == "__main__":
     main()

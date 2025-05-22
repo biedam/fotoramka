@@ -52,12 +52,15 @@ class Photo:
     PALETTE1 = (PALETTE_VAL1, PALETTE_FILE1)
     #Calibrated palette
     PALETTE2 = (PALETTE_VAL2, PALETTE_FILE2)
+    
 
-    def __init__(self, image_path):
+    def __init__(self, image_path, filename = "", description = ""):
         self.image_path = image_path
-        utils_dir = Path(__file__).parent
+        #utils_dir = Path(__file__).parent
         self.processing_path = "img.png"
         self.palette = None
+        self.filename = filename
+        self.description = description
 
     def set_palette(self, palette):
         self.palette = palette
@@ -227,7 +230,7 @@ class Photo:
                     self.thumb_path = out_path
             else:
                 if thumbnail == False:
-                    logging.info(f"saving resized image {out_path}")
+                    logging.info(f"saving resized image {self.image_path}")
                     img.save(self.image_path, quality=jpg_quality)
                 else:
                     image_path = Path(self.image_path)
