@@ -56,8 +56,11 @@ class PhotoAlbum:
             Active = 1
         )
 
-
     #def remove():
+        #image = PhotoData.get_by_id(image_id)
+        #image.delete_instance()
+
+        #delete also files from disk
 
     def list_all(self):
         total_images = PhotoData.select().count()
@@ -71,10 +74,23 @@ class PhotoAlbum:
         print("=====================================")
         logging.info("Database dump")
         print("=====================================")
-        for image in images:
-            print(f"{image.Photo_order}: {image.Original_filename}, {image.Resized_path}, {image.Photo_description}" +
-            f", {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
+        for image in PhotoData.select().order_by(PhotoData.Photo_order).dicts():
+            print(image)
+            #print(f"{image.Photo_order}: {image.Original_filename}, {image.Resized_path}, {image.Photo_description}" +
+            #f", {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
         print("=====================================")
+
+    def photo_byid(image_id):
+        #image = PhotoData.get_by_id(image_id)
+        #image = ImageData.get(ImageData.filename == "photo.jpg")
+
+        #try:
+        #image = ImageData.get_by_id(image_id)
+        #image.delete_instance()
+        #return True
+        #except ImageData.DoesNotExist:
+        #return False
+
     #def next_photo():
 
     #def random_photo():
