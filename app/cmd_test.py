@@ -119,9 +119,11 @@ def main():
     parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
     parser.add_argument('-angle', action='store_true', help='Get frame orientation')
     parser.add_argument('-rotate', type=str, help='Rotate frame')
-    parser.add_argument('-add', type=str, help='Add picture to database')
+    parser.add_argument('-add', type=str, help='Add picture to database usage: -add description -f path')
     parser.add_argument('-initdb', action='store_true', help='Initialise database')
     parser.add_argument('-listdb', action='store_true', help='List database')
+    parser.add_argument('-getdb', type=int, help='Get DB item by ID')
+    parser.add_argument('-deldb', type=int, help='Delete DB item by ID')
 
     args = parser.parse_args()
 
@@ -148,6 +150,20 @@ def main():
     elif args.listdb:
         album = PhotoAlbum()
         album.list_all()
+    elif args.getdb:
+        album = PhotoAlbum()
+        photo = album.get_byid(args.getdb)
+        if photo:
+            logging.info(f"retrived photo: {photo.Original_filename}")
+    elif args.deldb:
+        album = PhotoAlbum()
+        photo = album.get_byid(args.deldb)
+        if photo:
+            print(f"Are you sure to delete image {photo.Original_filename}, {photo.Resized_path}")
+            user_input = input("type yes to continue ")
+            if user_input == "yes":
+                album.remove(args.deldb)
+                
     else:
         parser.print_help()
 

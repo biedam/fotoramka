@@ -2,6 +2,7 @@ from peewee import SqliteDatabase, Model, CharField, IntegerField, TextField, fn
 from pathlib import Path
 from utils.photo import Photo, Orientation
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +57,20 @@ class PhotoAlbum:
             Active = 1
         )
 
-    #def remove():
+    def remove(self, image_id):
         #image = PhotoData.get_by_id(image_id)
-        #image.delete_instance()
+        #
+        try:
+            image = PhotoData.get_by_id(image_id)
+            if os.path.isfile(image.Resized_path):
+                os.remove(image.Resized_path)
+            if os.path.isfile(image.Thumbnail_path):
+                os.remove(image.Thumbnail_path)
 
+            image.delete_instance()
+            logging.info(f"image with ID {image_id} deleted")
+        except ImageData.DoesNotExist:
+            logging.warning(f"Image id {image_id} not in database")
         #delete also files from disk
 
     def list_all(self):
@@ -80,16 +91,29 @@ class PhotoAlbum:
             #f", {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
         print("=====================================")
 
-    def photo_byid(image_id):
+    def get_byid(self, image_id):
         #image = PhotoData.get_by_id(image_id)
         #image = ImageData.get(ImageData.filename == "photo.jpg")
+        try:
+            image = PhotoData.get_by_id(image_id)
+            photo = Photo(
+                image_path = image.Resized_path,
+                filename = image.Original_filename, 
+                description = image.Photo_description)
+            
+            photo.thumb_path = image.Thumbnail_path
+            photo.exif = {
+                "LongDate": image.LongDate,
+                "ShortDate": image.ShortDate,
+                "Country": image.Country,
+                "Location": image.Location
+            }
+            photo.orientation = Orientation(image.Orientation)
 
-        #try:
-        #image = ImageData.get_by_id(image_id)
-        #image.delete_instance()
-        #return True
-        #except ImageData.DoesNotExist:
-        #return False
+            return image
+        except PhotoData.DoesNotExist:
+            logging.warning(f"Image id {image_id} not in database")
+            return None
 
     #def next_photo():
 
