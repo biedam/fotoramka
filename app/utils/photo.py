@@ -242,7 +242,9 @@ class Photo:
                 self.orientation = _orientation
             return _orientation
 
-    def display(self, path):
+    def display(self, path=None):
+        if path == None: 
+            path = self.image_path
         try:
             epd.Init()
             print("clearing...")

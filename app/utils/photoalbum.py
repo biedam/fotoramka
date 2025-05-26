@@ -98,7 +98,7 @@ class PhotoAlbum:
             }
             photo.orientation = Orientation(image.Orientation)
 
-            return image
+            return photo
         except PhotoData.DoesNotExist:
             logging.warning(f"Image id {image_id} not in database")
             return None

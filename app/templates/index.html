@@ -36,11 +36,18 @@
     {%for i in range(0, len)%}
     <div id="zdjecie">
     <img src="{{url_for('static', filename = image_paths[i])}}"  width="30%"/>
-    <div><h2><p> Japonia, Tokyo, Shinagawa City, Kwitnące Wiśnie</p></h2><a href="index.html"><button>
+    <div><h2><p> {{descriptions[i]}} </p></h2>
+      <a href="index.html"><button>
       Usuń
-    </button></a>  <a href="index.html"><button>
-     Wyświetl
-    </button></a></div>
+    </button></a>  
+    
+    <!-- Form for Display -->
+    <form action="{{ url_for('display_image') }}" method="post">
+            <input type="hidden" name="image_id" value="{{ image_ids[i] }}">
+            <button type="submit">Wyświetl</button>
+    </form>
+    
+    </div>
     </div>
     {%endfor%}
      

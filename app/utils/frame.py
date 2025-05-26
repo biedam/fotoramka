@@ -23,8 +23,8 @@ I2C_BUS         = 0x01             #default use I2C1
 IMU_ADDRESS     = 0x19             #sensor address 1
 SERVO_GPIO      = 12               #GPIO with PWM: 12,13,18,19
 
-VERTICAL_ANGLE = 88
-HORIZONTAL_ANGLE = 2
+VERTICAL_ANGLE = 90
+HORIZONTAL_ANGLE = 0
 VERT_TO_HOR_SRV = 1400
 HOR_TO_VERT_SRV = 1570
 STOP_SRV = 1460
@@ -38,8 +38,7 @@ imu = DFRobot_IIS2DLPC_I2C(I2C_BUS ,IMU_ADDRESS)
 #my_factory = PiGPIOFactory()
 
 #servo = Servo(SERVO_GPIO, pin_factory=my_factory)
-gpio = pigpio.pi()
-gpio.set_mode(SERVO_GPIO, pigpio.OUTPUT)
+
 
 class Frame:
 
@@ -70,6 +69,8 @@ class Frame:
         #in horizontal position angle = 0 in vertical position angle = 90
         #servo = 1400 -> rotation from vertical to horizontal
         #servo = 1520 -> rotation from horizontal to vertical
+        gpio = pigpio.pi()
+        gpio.set_mode(SERVO_GPIO, pigpio.OUTPUT)
         logger.info(f"Rotating to {direction}")
         if direction == Orientation.VERTICAL:
             while self.orientation() < VERTICAL_ANGLE:

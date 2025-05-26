@@ -11,6 +11,7 @@ from pathlib import Path
 from uuid import uuid4
 import shutil
 import logging
+import threading
 
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
 
@@ -116,6 +117,16 @@ def list_database():
             f", desc: {image.Photo_description}, {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
     print("==================================================================")
     
+def display_byid(photo_id):
+    album = PhotoAlbum()
+    frm = Frame()
+    photo = album.get_byid(photo_id)
+    photo.set_palette(photo.PALETTE2)
+    angle = photo.orientation
+    thread_1 = threading.Thread(target=photo.display, args=())
+    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+    thread_1.start()
+    thread_2.start()
 
 def main():
     logger = logging.getLogger(__name__)
@@ -135,6 +146,7 @@ def main():
     parser.add_argument('-listdb', action='store_true', help='List database')
     parser.add_argument('-getdb', type=int, help='Get DB item by ID')
     parser.add_argument('-deldb', type=int, help='Delete DB item by ID')
+    parser.add_argument('-dispdb', type=int, help='Display DB item by ID')
 
     args = parser.parse_args()
 
@@ -164,16 +176,17 @@ def main():
         album = PhotoAlbum()
         photo = album.get_byid(args.getdb)
         if photo:
-            logging.info(f"retrived photo: {photo.Original_filename}")
+            logging.info(f"retrived photo: {photo.filename}")
     elif args.deldb:
         album = PhotoAlbum()
         photo = album.get_byid(args.deldb)
         if photo:
-            print(f"Are you sure to delete image {photo.Original_filename}, {photo.Resized_path}")
+            print(f"Are you sure to delete image {photo.filename}, {photo.image_path}")
             user_input = input("type yes to continue ")
             if user_input == "yes":
                 album.remove(args.deldb)
-                
+    elif args.dispdb:
+        display_byid(args.dispdb)
     else:
         parser.print_help()
 
