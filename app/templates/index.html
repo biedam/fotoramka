@@ -33,7 +33,16 @@
         </ul>
       </div>
     
-      
+    {%for i in range(0, len)%}
+    <div id="zdjecie">
+    <img src="{{url_for('static', filename = image_paths[i])}}"  width="30%"/>
+    <div><h2><p> Japonia, Tokyo, Shinagawa City, Kwitnące Wiśnie</p></h2><a href="index.html"><button>
+      Usuń
+    </button></a>  <a href="index.html"><button>
+     Wyświetl
+    </button></a></div>
+    </div>
+    {%endfor%}
      
     <div id="zdjecie1">
     <img src="https://cdn.glitch.global/ccedbb0c-b843-49f0-bd09-6d992c83329f/IMG-20250222-WA0007.jpg?v=1740228444384"  width="30%"/>

@@ -3,6 +3,7 @@ from pathlib import Path
 import os
 from utils.photo import Photo
 from utils.frame import Frame
+from utils.photoalbum import PhotoAlbum
 import threading
 
 
@@ -35,7 +36,14 @@ def process_file(file_path):
 
 @app.route('/')
 def index():
-    return render_template('/index.html')
+    album = PhotoAlbum()
+    images = album.list_all()
+    thumbnails = [image.Thumbnail_path for image in images]
+    image_paths = [Path(thumbnail).relative_to("static") for thumbnail in thumbnails]
+    
+    
+    print(image_paths)
+    return render_template('/index.html', len = len(images), image_paths = image_paths)
     #return 'To jest test serwera fotoramki'
 
 @app.route('/dodaj')

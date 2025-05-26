@@ -6,7 +6,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = 'photos'
+UPLOAD_FOLDER = 'static/photos'
 DB_NAME = 'photos.db'
 
 db_path = Path(UPLOAD_FOLDER) / DB_NAME
@@ -77,19 +77,7 @@ class PhotoAlbum:
         total_images = PhotoData.select().count()
         logging.info(f"Total images in DB: {total_images}")
         images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order)]
-        #for image in ImageData.select().order_by(ImageData.sort_order):
-        logging.info("List of images with original filename")
-        print("=====================================")
-        for image in images:
-            print(f"{image.Photo_order}: {image.Original_filename}")
-        print("=====================================")
-        logging.info("Database dump")
-        print("=====================================")
-        for image in PhotoData.select().order_by(PhotoData.Photo_order).dicts():
-            print(image)
-            #print(f"{image.Photo_order}: {image.Original_filename}, {image.Resized_path}, {image.Photo_description}" +
-            #f", {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
-        print("=====================================")
+        return images
 
     def get_byid(self, image_id):
         #image = PhotoData.get_by_id(image_id)

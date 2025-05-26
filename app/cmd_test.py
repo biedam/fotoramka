@@ -17,7 +17,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 
 #epd = epd13in3E.EPD()
-UPLOAD_FOLDER = 'photos'
+UPLOAD_FOLDER = 'static/photos'
 
 def epd_clear():
     img = Photo("")
@@ -105,6 +105,17 @@ def add(file_path, file_description):
     #print('Processing finished!')
     #print(exif_data)
     #print(img_orientation)
+def list_database():
+    album = PhotoAlbum()
+    images = album.list_all()
+
+    logging.info("List of images in database")
+    print("==================================================================")
+    for image in images:
+        print(f"photo number: {image.Photo_order}, ID: {image.id}, PATH: {image.Resized_path}, name: {image.Original_filename}" +
+            f", desc: {image.Photo_description}, {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
+    print("==================================================================")
+    
 
 def main():
     logger = logging.getLogger(__name__)
@@ -148,8 +159,7 @@ def main():
     elif args.initdb:
         initdb()
     elif args.listdb:
-        album = PhotoAlbum()
-        album.list_all()
+        list_database()
     elif args.getdb:
         album = PhotoAlbum()
         photo = album.get_byid(args.getdb)
