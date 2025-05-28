@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script src="/script.js" defer></script>
+  </head>
+
+  <body>
+    <div id="calaStrona">
+      <div id="nwm">
+        <h1>
+          Galeria Zdjęć Biedów
+        </h1>
+      </div>
+      <div id="naglowek">
+    
+      </div>
+      
+
+      <div id="nawigacja">
+        <ul>
+          
+          <li class="main-menu"><a href="/">Strona główna</a></li>
+          
+          <li class="main-menu"><a href="/dodaj">Dodaj Zdjęcie</a></li>
+          
+          <li class="main-menu"><a href="/ustawienia">Ustawienia</a></li>
+          
+        </ul>
+      </div>
+       <div id="nwm2">
+         
+    <div>
+      <form id="form1">
+        <div id="container">
+          
+      
+        <input type="radio" name="wyswietlanie"><label>Wyświetl losowo</label>
+        <input type="radio" name="wyswietlanie"><label>Wyświetl po kolei</label>
+        <input type="radio" name="wyswietlanie"><label>Wyświetl jedno zdjęcie</label>
+          
+        </div>
+        
+        <br>
+        
+         Jak Często Zmieniają Się Zdjęcia
+      
+        <select name="kiedy" id="kiedy">
+        <option>raz na pół godziny</option>
+        <option>raz na godzinę</option>
+        <option>raz na dwie godziny</option>
+        </select>
+        <br>
+        <input type="checkbox" />
+        Zmieniaj zdjęcia w nocy
+        <br>
+        <input type="submit" />
+        
+      </form>
+         </div>
+         
+      </div>
+      
+    </div>
+    
+  </body>
+</html>

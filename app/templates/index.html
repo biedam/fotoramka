@@ -16,67 +16,46 @@
           Galeria Zdjęć Biedów
         </h1>
       </div>
-        <div id="naglowek">
+      <div id="naglowek">
     
-     </div>
+      </div>
       
 
-    <div id="nawigacja">
-        <ul>
+      <div id="nawigacja">
+        <ul id="nav2">
           
-          <li class="main-menu"><a href="/"> Strona główna</a></li>
+          <li class="main-menu"><a href="/">Strona główna</a></li>
           
-          <li class="main-menu"><a href="/dodaj"> Dodaj Zdjęcie </a></li>
+          <li class="main-menu"><a href="/dodaj">Dodaj Zdjęcie </a></li>
           
-          <li class="main-menu"><a href="ustawienia.html"> Ustawienia </a></li>
+          <li class="main-menu"><a href="/ustawienia">Ustawienia</a></li>
           
         </ul>
       </div>
     
     {%for i in range(0, len)%}
-    <div id="zdjecie">
-    <img src="{{url_for('static', filename = image_paths[i])}}"  width="30%"/>
-    <div><h2><p> {{descriptions[i]}} </p></h2>
-      <a href="index.html"><button>
-      Usuń
-    </button></a>  
+      <div id="zdjecie">
+        <img src="{{url_for('static', filename = image_paths[i])}}" />
+        <div>
+          <h2><p> {{descriptions[i]}} </p></h2>
     
-    <!-- Form for Display -->
-    <form action="{{ url_for('display_image') }}" method="post">
+          <!-- Form for Delete -->
+          <form action="{{ url_for('delete_image') }}" method="post">
+            <input type="hidden" name="image_id" value="{{ image_ids[i] }}">
+            <button type="submit">Usuń</button>
+          </form>
+    
+          <!-- Form for Display -->
+          <form action="{{ url_for('display_image') }}" method="post">
             <input type="hidden" name="image_id" value="{{ image_ids[i] }}">
             <button type="submit">Wyświetl</button>
-    </form>
+          </form>
     
-    </div>
-    </div>
+        </div>
+      </div>
     {%endfor%}
      
-    <div id="zdjecie1">
-    <img src="https://cdn.glitch.global/ccedbb0c-b843-49f0-bd09-6d992c83329f/IMG-20250222-WA0007.jpg?v=1740228444384"  width="30%"/>
-      <div><h2><p> Japonia, Tokyo, Shinagawa City, Kwitnące Wiśnie</p></h2><a href="index.html"><button>
-      Usuń
-      </button></a>  <a href="index.html"><button>
-     Wyświetl
-      </button></a></div>
-      </div>
-      
-     <div id="zdjecie2">
-    <img src="https://cdn.glitch.global/ccedbb0c-b843-49f0-bd09-6d992c83329f/zdj2.jpg?v=1740764992902"  width="30%"/>
-      <div><h2><p> Japonia,Tokyo, Shibuya, Naleśniki</p></h2><a href="index.html"><button>
-      Usuń
-      </button></a> <a href="index.html"><button>
-     Wyświetl
-      </button></a></div>
-      </div>
-      
-       <div id="zdjecie3">
-    <img src="https://cdn.glitch.global/ccedbb0c-b843-49f0-bd09-6d992c83329f/zdj3.jpg?v=1740764997127"  width="30%"/>
-      <div><h2><p> Japonia, Tokyo, Minato City, Zegar Gibli </p></h2><a href="index.html"><button>
-      Usuń
-      </button></a>  <a href="index.html"><button>
-     Wyświetl
-      </button></a></div>
-      </div>
+  
   
         
        </div>

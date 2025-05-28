@@ -65,6 +65,10 @@ def index():
 def add_photo():
     return render_template('/dodaj.html')
 
+@app.route('/ustawienia')
+def settings():
+    return render_template('/ustawienia.html')
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -102,7 +106,9 @@ def display_image():
     frm = Frame()
     photo = album.get_byid(image_id)
     photo.set_palette(photo.PALETTE2)
+    #photo.dither(90)
     angle = photo.orientation
+    #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
     thread_1 = threading.Thread(target=photo.display, args=())
     thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
     thread_1.start()
@@ -111,6 +117,10 @@ def display_image():
     # Optionally: redirect to a page showing full image
     return redirect('/')
 
+@app.route('/delete_image', methods=['POST'])
+def delete_image():
+    #not yet implemented
+    return redirect('/')
 
 
 if __name__ == '__main__':
