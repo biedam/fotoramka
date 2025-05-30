@@ -13,7 +13,9 @@
    ```shell
    sudo apt install imagemagick
    pip3 install pycountry babel reverse_geocoder --break-system-packages
-   sudo apt-get install python3-smbus
+   sudo apt install python3-smbus
+   sudo apt install python3-flask
+   sudp apt install python3-peewee
    ```
 
 6. Fotoramka uses pgpio for controlling servo. This library uses daemon, which have to be started at startpu:
@@ -73,3 +75,10 @@ Fotoramka stores jpeg images resized & cropped to EPD screen resolution (1600x12
 |98          |1010          |
 |95          |714           |
 |90          |481           |
+
+## Image colors
+
+R (126,10,28)
+G (68,145,66)
+B (75,66,189)
+Y (244,244,0)

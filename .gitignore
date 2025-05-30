@@ -3,3 +3,4 @@ __pycache__/
 test_img/
 /app/img.png
 /app/resized.jpg
+photos/

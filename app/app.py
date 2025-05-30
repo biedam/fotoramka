@@ -1,77 +1,19 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
+from pathlib import Path
 import os
-import reverse_geocoder as rg
-from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
+from utils.photo import Photo
+from utils.frame import Frame
+from utils.photoalbum import PhotoAlbum
+from uuid import uuid4
+import threading
+import logging
 
-def resize_image(image_path):
-    print("resize start")
-    with Image.open(image_path) as img:
-        width, height = img.size
-        target_width = 1600
-        target_height = 1200
-        if width > height:
-            new_width = target_width
-            new_height = int((height / width) * target_width)
-            img = img.resize((new_width, new_height), Image.LANCZOS)
-        else:
-            new_width = int((width / height) * target_height)
-            new_height = target_height
-            img = img.resize((new_width, new_height), Image.LANCZOS)
-        
-        # Crop the image to 1600x1200 if needed
-        left = (new_width - target_width) / 2
-        top = (new_height - target_height) / 2
-        right = (new_width + target_width) / 2
-        bottom = (new_height + target_height) / 2
-        img = img.crop((left, top, right, bottom))
-        img.save(image_path)
+logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
 
-def get_exif_data(image_path):
-    print("exif start")
-    with Image.open(image_path) as img:
-        exif_data = img._getexif()
-        if not exif_data:
-            print("no exif data")
-            return {}
-        exif = {}
-        for tag, value in exif_data.items():
-            decoded = TAGS.get(tag, tag)
-            exif[decoded] = value
-        
-        gps_info = {}
-        if "GPSInfo" in exif:
-            for key, val in exif["GPSInfo"].items():
-                gps_info[GPSTAGS.get(key, key)] = val
-        
-        # Extract coordinates if available
-        latitude = None
-        longitude = None
-        country = None
-        if "GPSLatitude" in gps_info and "GPSLongitude" in gps_info:
-            lat_vals = gps_info["GPSLatitude"]
-            lon_vals = gps_info["GPSLongitude"]
-            lat_ref = gps_info.get("GPSLatitudeRef", "N")
-            lon_ref = gps_info.get("GPSLongitudeRef", "E")
-            
-            latitude = (lat_vals[0] + lat_vals[1] / 60 + lat_vals[2] / 3600) * (-1 if lat_ref == "S" else 1)
-            longitude = (lon_vals[0] + lon_vals[1] / 60 + lon_vals[2] / 3600) * (-1 if lon_ref == "W" else 1)
-            
-            # Reverse geocode to get country name
-            location = rg.search((latitude, longitude))
-            country = location[0]['cc'] if location else None
-        
-        print("EXIF Data:", {"DateTime": exif.get("DateTime"), "Latitude": latitude, "Longitude": longitude, "Country": country})
-        
-        return {
-            "DateTime": exif.get("DateTime"),
-            "Latitude": latitude,
-            "Longitude": longitude,
-            "Country": country
-        }
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'zdjecia'
+
+UPLOAD_FOLDER = 'static/photos'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -81,20 +23,51 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 #enable debug
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def process_file(img):
+    app.logger.info('Start processing image')
+    
+    exif_data = img.get_exif()
+    app.logger.info(f'Get EXIF data: {exif_data}')
+    app.logger.info('Generate thumbnail')
+    img.resize(target_width = 640, target_height = 480, thumbnail = True)
+    app.logger.info('Resize image')
+    img.resize()
+    app.logger.info('Add to database')
+    album = PhotoAlbum()
+    album.add(img)
+
 
 @app.route('/')
 def index():
-    return render_template('/index.html')
+    album = PhotoAlbum()
+    images = album.list_all()
+    thumbnails = [image.Thumbnail_path for image in images]
+    image_ids = [image.id for image in images]
+    descriptions = [f"{image.Photo_description}, {image.Country}, {image.ShortDate}" for image in images]
+    image_paths = [Path(thumbnail).relative_to("static") for thumbnail in thumbnails]
+    
+    
+    print(image_paths)
+    return render_template(
+        '/index.html', 
+        len = len(images), 
+        image_paths = image_paths,
+        image_ids = image_ids,
+        descriptions = descriptions)
     #return 'To jest test serwera fotoramki'
 
 @app.route('/dodaj')
 def add_photo():
     return render_template('/dodaj.html')
+
+@app.route('/ustawienia')
+def settings():
+    return render_template('/ustawienia.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -102,29 +75,56 @@ def upload_file():
         return jsonify({'message': 'No file part'}), 400
     file = request.files['file']
     description = request.form.get('description', '')
-    print(description)
+    
     if file.filename == '':
         return jsonify({'message': 'No selected file'}), 400
     if not allowed_file(file.filename):
         return jsonify({'message': 'File type not allowed'}), 400
 
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(file_path)
+    app.logger.info(f"Start processing file {file.filename}, {description}")
+    original_path = Path(file.filename)
+    target_path = Path(app.config['UPLOAD_FOLDER']) / f"{uuid4().__str__()}{original_path.suffix}"
+    file.save(target_path)
 
-    # Extract EXIF data
-    exif_data = get_exif_data(file_path)
+    img = Photo(
+        image_path = target_path, 
+        filename = original_path.stem, 
+        description = description)
 
-    # Resize image
-    resize_image(file_path)
-    
-
+    # Process uploaded file
+    thread = threading.Thread(target=process_file, args=(img,))
+    thread.start()
+    app.logger.info('File uploaded successfully, processing in the background')
 
     return jsonify({'message': 'File uploaded successfully', 'description': description})
 
+@app.route('/display_image', methods=['POST'])
+def display_image():
+    image_id = request.form['image_id']
+    app.logger.info(f"Display image ID: {image_id}")
+    album = PhotoAlbum()
+    frm = Frame()
+    photo = album.get_byid(image_id)
+    photo.set_palette(photo.PALETTE2)
+    #photo.dither(90)
+    angle = photo.orientation
+    #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
+    thread_1 = threading.Thread(target=photo.display, args=())
+    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+    thread_1.start()
+    thread_2.start()
 
+    # Optionally: redirect to a page showing full image
+    return redirect('/')
 
+@app.route('/delete_image', methods=['POST'])
+def delete_image():
+    #not yet implemented
+    return redirect('/')
 
 
 if __name__ == '__main__':
     #app.run(debug=True, port=80, host='0.0.0.0')
     app.run(debug=True, host='0.0.0.0')
+
+
