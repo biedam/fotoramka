@@ -106,3 +106,6 @@ class PhotoAlbum:
     #def next_photo():
 
     #def random_photo():
+
+
+Album = PhotoAlbum()

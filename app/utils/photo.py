@@ -247,18 +247,16 @@ class Photo:
             path = self.image_path
         try:
             epd.Init()
-            print("clearing...")
+            logging.info("Clearing framebuffer")
 
             # Drawing on the image
-            print("1.Drawing on the image...")
             image = Image.new('RGB', (epd.width, epd.height), epd.WHITE)  # 255: clear the frame
             # read bmp file 
-            print("2.read bmp file")
+            logging.info("Read photo file")
             image = Image.open(path)
-            print("test")
             pal_image = Image.new("P", (1,1))
             pal_image.putpalette(self.palette[0])
-            print("test")
+            logging.info("Set palette")
             # Check if we need to rotate the image
             imwidth, imheight = image.size
             print(imwidth)
@@ -267,7 +265,7 @@ class Photo:
             elif(imwidth == epd.height and imheight == epd.width):
                 image_temp = image.rotate(90, expand=True)
             else:
-                print("Invalid image dimensions: %d x %d, expected %d x %d" % (imwidth, imheight, epd.width, epd.height))
+                logging.error("Invalid image dimensions: %d x %d, expected %d x %d" % (imwidth, imheight, epd.width, epd.height))
 
             # Convert the soruce image to the 7 colors, dithering if needed
             image_7color = image_temp.convert("RGB").quantize(palette=pal_image)
@@ -285,10 +283,10 @@ class Photo:
             time.sleep(3)
 
 
-            print("goto sleep...")
+            logging.info("goto sleep...")
             epd.sleep()
         except:
-            print("goto sleep...")
+            logging.info("goto sleep...")
             epd.sleep()
     def clear(self):
         try:

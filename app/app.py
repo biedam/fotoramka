@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, flash
 from pathlib import Path
 import os
 from utils.photo import Photo
 from utils.frame import Frame
-from utils.photoalbum import PhotoAlbum
+from utils.photoalbum import Album
 from uuid import uuid4
 import threading
 import logging
@@ -23,7 +23,11 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 #enable debug
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
+app.secret_key = b'some_secret_key'
+
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -38,14 +42,20 @@ def process_file(img):
     app.logger.info('Resize image')
     img.resize()
     app.logger.info('Add to database')
-    album = PhotoAlbum()
-    album.add(img)
+    Album.add(img)
+
+display_lock = threading.Lock()
+
+def display_photo(photo):
+    app.logger.info('Start display photo')
+    with display_lock:
+        photo.display()
+        app.logger.info('End display photo')
 
 
 @app.route('/')
 def index():
-    album = PhotoAlbum()
-    images = album.list_all()
+    images = Album.list_all()
     thumbnails = [image.Thumbnail_path for image in images]
     image_ids = [image.id for image in images]
     descriptions = [f"{image.Photo_description}, {image.Country}, {image.ShortDate}" for image in images]
@@ -102,24 +112,28 @@ def upload_file():
 def display_image():
     image_id = request.form['image_id']
     app.logger.info(f"Display image ID: {image_id}")
-    album = PhotoAlbum()
     frm = Frame()
-    photo = album.get_byid(image_id)
+    photo = Album.get_byid(image_id)
     photo.set_palette(photo.PALETTE2)
     #photo.dither(90)
     angle = photo.orientation
-    #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-    thread_1 = threading.Thread(target=photo.display, args=())
-    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
-    thread_1.start()
-    thread_2.start()
+    if(display_lock.locked()):
+        flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
+    else:
+        #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
+        thread_1 = threading.Thread(target=display_photo, args=(photo,))
+        thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+        thread_1.start()
+        thread_2.start()
 
     # Optionally: redirect to a page showing full image
     return redirect('/')
 
 @app.route('/delete_image', methods=['POST'])
 def delete_image():
-    #not yet implemented
+    image_id = request.form['image_id']
+    app.logger.info(f"Deleting image ID: {image_id}")
+    Album.remove(image_id)
     return redirect('/')
 
 
