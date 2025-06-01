@@ -72,7 +72,7 @@
 
           xhr.onload = function() {
               if (xhr.status === 200) {
-                  document.getElementById("status").innerText = "Zdjęcie wysłane!";
+                  document.getElementById("status").innerText = "Zdjęcie zostało wysłane, trwa przetwarzanie. Za chwilę zdjęcie pojawi się w galerii.";
               } else {
                   document.getElementById("status").innerText = "Błąd wysyłania";
               }

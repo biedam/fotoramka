@@ -96,22 +96,30 @@ class Photo:
 
     def get_exif(self):
         logger.info("exif start")
-        print("exif start")
         with Image.open(self.image_path) as img:
             exif_data = img._getexif()
             if not exif_data:
-                print("no exif data")
-                return {}
+                logger.info("no exif data")
+                self.exif = {
+                    "LongDate": None,
+                    "ShortDate": None,
+                    "Country": None,
+                    "Location": None
+                }
+                return self.exif
             exif = {}
+            logger.debug("get exif data")
             for tag, value in exif_data.items():
                 decoded = TAGS.get(tag, tag)
                 exif[decoded] = value
             
+            logger.debug("get gps info")
             gps_info = {}
             if "GPSInfo" in exif:
                 for key, val in exif["GPSInfo"].items():
                     gps_info[GPSTAGS.get(key, key)] = val
             
+            logger.debug(gps_info)
             # Extract coordinates if available
             latitude = None
             longitude = None
@@ -120,6 +128,7 @@ class Photo:
             if "GPSLatitude" in gps_info and "GPSLongitude" in gps_info:
                 lat_vals = gps_info["GPSLatitude"]
                 lon_vals = gps_info["GPSLongitude"]
+                logger.debug(f"gps info {lat_vals}, {lon_vals}")
                 lat_ref = gps_info.get("GPSLatitudeRef", "N")
                 lon_ref = gps_info.get("GPSLongitudeRef", "E")
                 
@@ -127,11 +136,18 @@ class Photo:
                 longitude = (lon_vals[0] + lon_vals[1] / 60 + lon_vals[2] / 3600) * (-1 if lon_ref == "W" else 1)
                 
                 # Reverse geocode to get country name
-                location = rg.search((latitude, longitude))
+                logger.debug(f"reverse geocode {latitude}, {longitude}")
+                try: 
+                    location = rg.search((latitude, longitude))
+                except:
+                    logger.debug(f"No valid GPS data")
+                    location = None
+
                 country_code = location[0]['cc'] if location else None
                 photo_location = location[0]['admin1'] if location else None
 
                 # ✅ Convert country code to full name
+                logger.debug("convert country code to full name")
                 try:
                     country = pycountry.countries.get(alpha_2=country_code)
                     if country:
@@ -188,7 +204,7 @@ class Photo:
                 self.orientation = None
             width, height = img.size
             #preserve EXIF data
-            exif = img.info['exif']
+            #exif = img.info['exif']
             print(img.size)
             
             if width > height: # horizontal photo

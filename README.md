@@ -37,6 +37,10 @@
    - `cp fotoramka/app/fonts/Excalifont-Regular.ttf ~/.local/share/fonts/`
    - update font cache `fc-cache -fv`
 
+8. Enable fotoramka service in systemd
+   - in file fotoramka.service replace 'bieda' with your user name and WorkingDirectory
+   - copy fotoramka.service `sudo cp fotoramka.service /etc/systemd/system/fotoramka.service`
+
 ## Schematics
 
 ![image](doc/Fotoramka_schematic.png)

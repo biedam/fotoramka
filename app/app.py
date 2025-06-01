@@ -8,7 +8,8 @@ from uuid import uuid4
 import threading
 import logging
 
-logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
+#logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG)
 
 
 app = Flask(__name__)
@@ -58,9 +59,17 @@ def index():
     images = Album.list_all()
     thumbnails = [image.Thumbnail_path for image in images]
     image_ids = [image.id for image in images]
-    descriptions = [f"{image.Photo_description}, {image.Country}, {image.ShortDate}" for image in images]
-    image_paths = [Path(thumbnail).relative_to("static") for thumbnail in thumbnails]
+    descriptions = []
+    for image in images:
+        if image.Country == None:
+            if image.ShortDate == None:
+                descriptions.append(f"{image.Photo_description}")
+            else:
+                descriptions.append(f"{image.Photo_description}, {image.ShortDate}")
+        else:
+            descriptions.append(f"{image.Photo_description}, {image.Country}, {image.ShortDate}")
     
+    image_paths = [Path(thumbnail).relative_to("static") for thumbnail in thumbnails]
     
     print(image_paths)
     return render_template(
@@ -138,7 +147,12 @@ def delete_image():
 
 
 if __name__ == '__main__':
-    #app.run(debug=True, port=80, host='0.0.0.0')
-    app.run(debug=True, host='0.0.0.0')
+    run_mode = os.environ.get('FLASK_RUN_MODE', 'development')
+    app.logger.info(f"environment {run_mode}")
+    if run_mode == 'production':
+        app.run(host='0.0.0.0', port=80, debug=False)
+    else:
+        app.run(host='0.0.0.0', port=5000, debug=True)
+    #app.run(debug=True, host='0.0.0.0')
 
 
