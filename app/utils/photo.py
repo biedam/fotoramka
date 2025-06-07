@@ -104,7 +104,8 @@ class Photo:
                     "LongDate": None,
                     "ShortDate": None,
                     "Country": None,
-                    "Location": None
+                    "Location": None,
+                    "Date": None
                 }
                 return self.exif
             exif = {}
@@ -172,7 +173,8 @@ class Photo:
                 "LongDate": long_date,
                 "ShortDate": short_date,
                 "Country": country_name,
-                "Location": photo_location
+                "Location": photo_location,
+                "Date": date_string
             }
 
             return self.exif

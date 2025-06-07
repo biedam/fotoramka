@@ -56,7 +56,18 @@ def display_photo(photo):
 
 @app.route('/')
 def index():
-    images = Album.list_all()
+    sort_by = request.args.get('sort_by', 'added_asc')
+    if sort_by == 'added_asc':
+        images = Album.list_all(order_by='id', asc=True)
+    elif sort_by == 'date_asc':
+        images = Album.list_all(order_by='date', asc=True)
+    elif sort_by == 'date_desc':
+        images = Album.list_all(order_by='date', asc=False)
+    elif sort_by == 'added_desc':
+        images = Album.list_all(order_by='id', asc=False)
+    else:  
+        images = Album.list_all()
+    
     thumbnails = [image.Thumbnail_path for image in images]
     image_ids = [image.id for image in images]
     descriptions = []
@@ -77,7 +88,8 @@ def index():
         len = len(images), 
         image_paths = image_paths,
         image_ids = image_ids,
-        descriptions = descriptions)
+        descriptions = descriptions,
+        sort_by=sort_by)
     #return 'To jest test serwera fotoramki'
 
 @app.route('/dodaj')

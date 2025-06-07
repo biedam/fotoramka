@@ -32,6 +32,18 @@
           
         </ul>
       </div>
+
+      <div>
+        <form method="get" action="/">
+          <label for="sort_by">Sortuj według:</label>
+          <select name="sort_by" id="sort_by" onchange="this.form.submit()">
+            <option value="added_asc" {% if sort_by == 'added_asc' %}selected{% endif %}>Kolejność dodania</option>
+            <option value="added_desc" {% if sort_by == 'added_desc' %}selected{% endif %}>Kolejność dodania malejąco</option>
+            <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Data rosnąco</option>
+            <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Data malejąco</option>
+          </select>
+        </form>
+      </div>
     
     {%for i in range(0, len)%}
       <div id="zdjecie">

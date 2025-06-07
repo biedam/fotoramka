@@ -114,7 +114,7 @@ def list_database():
     print("==================================================================")
     for image in images:
         print(f"photo number: {image.Photo_order}, ID: {image.id}, PATH: {image.Resized_path}, name: {image.Original_filename}" +
-            f", desc: {image.Photo_description}, {image.LongDate}, {image.Country}, {Orientation(image.Orientation)}")
+            f", desc: {image.Photo_description}, {image.LongDate}, {image.Date}")
     print("==================================================================")
     
 def display_byid(photo_id):
@@ -147,6 +147,7 @@ def main():
     parser.add_argument('-getdb', type=int, help='Get DB item by ID')
     parser.add_argument('-deldb', type=int, help='Delete DB item by ID')
     parser.add_argument('-dispdb', type=int, help='Display DB item by ID')
+    parser.add_argument('-adddate', type=str, help='Add date to DB item, usage -adddate 2025:01:01 -getdb ID')
 
     args = parser.parse_args()
 
@@ -172,6 +173,12 @@ def main():
         initdb()
     elif args.listdb:
         list_database()
+    elif args.adddate:
+        album = PhotoAlbum()
+        photo = album.get_byid(args.getdb)
+        if photo:
+            logging.info(f"retrived photo: {photo.filename}, {photo.exif['LongDate']}")
+            album.add_date(args.getdb,args.adddate)
     elif args.getdb:
         album = PhotoAlbum()
         photo = album.get_byid(args.getdb)

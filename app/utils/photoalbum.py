@@ -28,6 +28,7 @@ class PhotoData(Model):
     Location = TextField(null=True)                # 
     Orientation = IntegerField(null=True)          # EXIF orientation value (enum)
     Active = IntegerField(null=True)               # for future use
+    Date = CharField(null=True)
 
     class Meta:
         database = db
@@ -53,6 +54,7 @@ class PhotoAlbum:
             ShortDate = photo.exif['ShortDate'],
             Country = photo.exif['Country'],
             Location = photo.exif['Location'],
+            Date = photo.exif['Date'],
             Orientation = photo.orientation.value,
             Active = 1
         )
@@ -73,11 +75,20 @@ class PhotoAlbum:
             logging.warning(f"Image id {image_id} not in database")
         #delete also files from disk
 
-    def list_all(self):
+    def list_all(self, order_by='id', asc=True):
         total_images = PhotoData.select().count()
         logging.info(f"Total images in DB: {total_images}")
-        #images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order)]
-        images = [img for img in PhotoData.select().order_by(PhotoData.ShortDate)]
+        if order_by == 'date':
+            if asc:
+                images = [img for img in PhotoData.select().order_by(PhotoData.Date)]
+            else:
+                images = [img for img in PhotoData.select().order_by(PhotoData.Date.desc())]
+        else:
+            if asc:
+                images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order)]
+            else:
+                images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order.desc())]
+        
         return images
 
     def get_byid(self, image_id):
@@ -95,11 +106,21 @@ class PhotoAlbum:
                 "LongDate": image.LongDate,
                 "ShortDate": image.ShortDate,
                 "Country": image.Country,
-                "Location": image.Location
+                "Location": image.Location,
+                "Date": image.Date
             }
             photo.orientation = Orientation(image.Orientation)
 
             return photo
+        except PhotoData.DoesNotExist:
+            logging.warning(f"Image id {image_id} not in database")
+            return None
+
+    def add_date(self, image_id, date):
+        try:
+            image = PhotoData.get_by_id(image_id)
+            image.Date = date
+            image.save()
         except PhotoData.DoesNotExist:
             logging.warning(f"Image id {image_id} not in database")
             return None
