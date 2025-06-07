@@ -125,12 +125,15 @@ def display_image():
     photo = Album.get_byid(image_id)
     photo.set_palette(photo.PALETTE2)
     #photo.dither(90)
+    text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
+    photo.annotate('South',40,text)
     angle = photo.orientation
     if(display_lock.locked()):
         flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
     else:
-        #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-        thread_1 = threading.Thread(target=display_photo, args=(photo,))
+        flash("Wyświetlanie zdjęcia...")
+        thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
+        #thread_1 = threading.Thread(target=display_photo, args=(photo,))
         thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
         thread_1.start()
         thread_2.start()

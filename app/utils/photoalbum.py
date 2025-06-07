@@ -76,7 +76,8 @@ class PhotoAlbum:
     def list_all(self):
         total_images = PhotoData.select().count()
         logging.info(f"Total images in DB: {total_images}")
-        images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order)]
+        #images = [img for img in PhotoData.select().order_by(PhotoData.Photo_order)]
+        images = [img for img in PhotoData.select().order_by(PhotoData.ShortDate)]
         return images
 
     def get_byid(self, image_id):

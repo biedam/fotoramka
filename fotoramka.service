@@ -5,10 +5,10 @@ After=network.target
 [Service]
 User=bieda
 WorkingDirectory=/home/bieda/fotoramka/app
-ExecStart=sudo python3 app.py
+ExecStart=python3 app.py
 Restart=always
 RestartSec=5
-Environment=FLASK_RUN_MODE=production
+Environment=FLASK_RUN_MODE=development
 StandardOutput=append:/home/bieda/fotoramka/fotoramka.log
 StandardError=append:/home/bieda/fotoramka/fotoramka.err
 

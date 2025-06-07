@@ -40,6 +40,9 @@
 8. Enable fotoramka service in systemd
    - in file fotoramka.service replace 'bieda' with your user name and WorkingDirectory
    - copy fotoramka.service `sudo cp fotoramka.service /etc/systemd/system/fotoramka.service`
+   - update systemctl `sudo systemctl daemon-reexec`
+   - start service `sudo systemctl start fotoramka`
+   - stop service `sudo systemctl stop fotoramka`
 
 ## Schematics
 
