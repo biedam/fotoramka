@@ -35,7 +35,7 @@
        <div id="nwm2">
          
     <div>
-      <form id="form1">
+      <form id="form1" method="post">
         <div id="container">
           
       
@@ -65,9 +65,9 @@
         Opis zdjęcia
       
         <select name="opis" id="opis">
-        <option>nie wyświetlaj</option>
-        <option>wyświetl opis</option>
-        <option>wyświetl opis, lokalizację i datę</option>
+          <option value="none" {% if settings['opis'] == 'none' %}selected{% endif %}>nie wyświetlaj</option>
+          <option value="desc" {% if settings['opis'] == 'desc' %}selected{% endif %}>wyświetl opis</option>
+          <option value="desc_date" {% if settings['opis'] == 'desc_date' %}selected{% endif %}>wyświetl opis, lokalizację i datę</option>
         </select>
         <br>
         <br>

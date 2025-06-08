@@ -7,6 +7,7 @@ from utils.photoalbum import Album
 from uuid import uuid4
 import threading
 import logging
+from utils.settings import set_setting, get_setting, init_setting
 
 #logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG)
@@ -28,7 +29,7 @@ app.secret_key = b'some_secret_key'
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-
+init_setting()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -96,9 +97,20 @@ def index():
 def add_photo():
     return render_template('/dodaj.html')
 
-@app.route('/ustawienia')
+@app.route('/ustawienia', methods=['GET', 'POST'])
 def settings():
-    return render_template('/ustawienia.html')
+    if request.method == 'POST':
+        app.logger.info(f"Set settings: opis {request.form.get('opis')}")
+        set_setting('opis', request.form.get('opis'))
+        return redirect('/ustawienia')  # reload to GET after POST
+
+    current_settings = {
+        'opis': get_setting('opis', '')
+    }
+
+    return render_template(
+        '/ustawienia.html',
+        settings=current_settings)
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
