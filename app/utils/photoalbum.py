@@ -116,6 +116,11 @@ class PhotoAlbum:
             logging.warning(f"Image id {image_id} not in database")
             return None
 
+    def get_random(self):
+        random_entry = PhotoData.select().order_by(fn.Random()).first()
+        logging.info(f"Selected random photo with ID: {random_entry}")
+        return self.get_byid(random_entry.id)
+
     def add_date(self, image_id, date):
         try:
             image = PhotoData.get_by_id(image_id)

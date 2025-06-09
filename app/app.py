@@ -31,6 +31,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 init_setting()
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -46,13 +47,74 @@ def process_file(img):
     app.logger.info('Add to database')
     Album.add(img)
 
+#================= Functions to display image ==================
+
+def Generate_description(description, country, short_date, content = 'desc_date'):
+    if content == 'desc_date':
+        if country == None:
+            if short_date == None:
+                text = f"{description}"
+            else:
+                text = f"{description}, {short_date}"
+        else:
+            text = f"{description}, {country}, {short_date}"
+    elif content == 'desc':
+        text = description
+    elif content == 'none':
+        text = ''
+    else:
+        text = ''
+    
+    return text
+
 display_lock = threading.Lock()
 
-def display_photo(photo):
+def display_photo_runner(photo):
     app.logger.info('Start display photo')
     with display_lock:
-        photo.display()
+        photo.display(photo.processing_path)
         app.logger.info('End display photo')
+
+def display_photo(photo):
+    app.logger.info(f"Displaying photo: {photo.image_path}")
+    photo.set_palette(photo.PALETTE2)
+    frm = Frame()
+    #photo.dither(90)
+    angle = photo.orientation
+    text = Generate_description(
+        photo.description,photo.exif['Country'],
+        photo.exif['ShortDate'],
+        get_setting('opis', ''))
+    app.logger.info(f"Annotating image with text: {text}")        
+    #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
+    photo.annotate('South',40,text)
+        #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
+    thread_1 = threading.Thread(target=display_photo_runner, args=(photo,))
+    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+    thread_1.start()
+    thread_2.start()
+
+#================= Display scheduler functions ==================
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
+
+scheduler = BackgroundScheduler()
+
+def scheduled_image_update():
+    app.logger.info('==============================')
+    app.logger.info('Scheduled Image update')
+    app.logger.info('==============================')
+
+    photo = Album.get_random()
+    display_photo(photo)
+
+scheduler.add_job(
+    scheduled_image_update, 
+    'cron', 
+    hour='0,12', 
+    minute=0, 
+    id='image_update', 
+    replace_existing=True)
 
 
 @app.route('/')
@@ -73,17 +135,11 @@ def index():
     image_ids = [image.id for image in images]
     descriptions = []
     for image in images:
-        if image.Country == None:
-            if image.ShortDate == None:
-                descriptions.append(f"{image.Photo_description}")
-            else:
-                descriptions.append(f"{image.Photo_description}, {image.ShortDate}")
-        else:
-            descriptions.append(f"{image.Photo_description}, {image.Country}, {image.ShortDate}")
+        descriptions.append(Generate_description(image.Photo_description, image.Country, image.ShortDate))
     
     image_paths = [Path(thumbnail).relative_to("static") for thumbnail in thumbnails]
     
-    print(image_paths)
+    #print(image_paths)
     return render_template(
         '/index.html', 
         len = len(images), 
@@ -145,22 +201,34 @@ def upload_file():
 def display_image():
     image_id = request.form['image_id']
     app.logger.info(f"Display image ID: {image_id}")
-    frm = Frame()
+    #frm = Frame()
     photo = Album.get_byid(image_id)
-    photo.set_palette(photo.PALETTE2)
-    #photo.dither(90)
-    text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
-    photo.annotate('South',40,text)
-    angle = photo.orientation
+
     if(display_lock.locked()):
         flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
     else:
         flash("Wyświetlanie zdjęcia...")
-        thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-        #thread_1 = threading.Thread(target=display_photo, args=(photo,))
-        thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
-        thread_1.start()
-        thread_2.start()
+        display_photo(photo)
+
+    #photo.set_palette(photo.PALETTE2)
+    #photo.dither(90)
+    #angle = photo.orientation
+    #if(display_lock.locked()):
+    #    flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
+    #else:
+    #    flash("Wyświetlanie zdjęcia...")
+    #    text = Generate_description(
+    #    photo.description,photo.exif['Country'],
+    #    photo.exif['ShortDate'],
+    #    get_setting('opis', ''))
+    #    app.logger.info(f"Annotating image with text: {text}")        
+    #    #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
+    #    photo.annotate('South',40,text)
+    #    thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
+    #    #thread_1 = threading.Thread(target=display_photo, args=(photo,))
+    #    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+    #    thread_1.start()
+    #    thread_2.start()
 
     # Optionally: redirect to a page showing full image
     return redirect('/')
@@ -173,7 +241,13 @@ def delete_image():
     return redirect('/')
 
 
+
 if __name__ == '__main__':
+    #only run scheduler in the flask main process
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        scheduler.start()
+    atexit.register(lambda: scheduler.shutdown())
+
     run_mode = os.environ.get('FLASK_RUN_MODE', 'development')
     app.logger.info(f"environment {run_mode}")
     if run_mode == 'production':
