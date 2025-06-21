@@ -7,6 +7,7 @@ from utils.photoalbum import Album
 from uuid import uuid4
 import threading
 import logging
+from datetime import datetime as dt
 from utils.settings import set_setting, get_setting, init_setting
 
 #logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
@@ -77,6 +78,7 @@ def display_photo_runner(photo):
 
 def display_photo(photo):
     app.logger.info(f"Displaying photo: {photo.image_path}")
+    print(f"[{dt.now()}] Displaying photo: {photo.image_path}, {photo.description}")
     photo.set_palette(photo.PALETTE2)
     frm = Frame()
     #photo.dither(90)
@@ -104,9 +106,17 @@ def scheduled_image_update():
     app.logger.info('==============================')
     app.logger.info('Scheduled Image update')
     app.logger.info('==============================')
+    print(f"[{dt.now()}] Scheduled Image update")
+    disp_setting = get_setting('disp', '')
 
-    photo = Album.get_random()
-    display_photo(photo)
+    if disp_setting == 'random':
+        app.logger.info('display rantom photo')
+        photo = Album.get_random()
+        display_photo(photo)
+    else:
+        app.logger.info('no photo change')
+
+    
 
 scheduler.add_job(
     scheduled_image_update, 
@@ -116,6 +126,22 @@ scheduler.add_job(
     id='image_update', 
     replace_existing=True)
 
+def scheduler_update(freq):
+
+    if freq == '1':
+        hours = '0'
+    elif freq == '2':
+        hours = '0,12'
+    elif freq == '4':
+    # do not update photo at night time (0AM - 6AM)
+        hours = '0,12,18'
+
+    try:
+        job_id ='image_update'
+        scheduler.reschedule_job(job_id, trigger='cron', hour=hours, minute=52 )
+        app.logger.info(f"Scheduler rescheduled to following hours: {hours}")
+    except Exception as e:
+        return app.logger.error(str(e))
 
 @app.route('/')
 def index():
@@ -158,10 +184,19 @@ def settings():
     if request.method == 'POST':
         app.logger.info(f"Set settings: opis {request.form.get('opis')}")
         set_setting('opis', request.form.get('opis'))
+        app.logger.info(f"Set settings: freq {request.form.get('freq')}")
+        set_setting('freq', request.form.get('freq'))
+        app.logger.info(f"Set settings: disp {request.form.get('disp')}")
+        set_setting('disp', request.form.get('disp'))
+        
+        scheduler_update(get_setting('freq', ''))
+
         return redirect('/ustawienia')  # reload to GET after POST
 
     current_settings = {
-        'opis': get_setting('opis', '')
+        'opis': get_setting('opis', ''),
+        'freq': get_setting('freq', ''),
+        'disp': get_setting('disp', '')
     }
 
     return render_template(
@@ -181,6 +216,7 @@ def upload_file():
         return jsonify({'message': 'File type not allowed'}), 400
 
     app.logger.info(f"Start processing file {file.filename}, {description}")
+    print(f"[{dt.now()}] Uploaded photo {file.filename}, {description}")
     original_path = Path(file.filename)
     target_path = Path(app.config['UPLOAD_FOLDER']) / f"{uuid4().__str__()}{original_path.suffix}"
     file.save(target_path)
@@ -210,27 +246,6 @@ def display_image():
         flash("Wyświetlanie zdjęcia...")
         display_photo(photo)
 
-    #photo.set_palette(photo.PALETTE2)
-    #photo.dither(90)
-    #angle = photo.orientation
-    #if(display_lock.locked()):
-    #    flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
-    #else:
-    #    flash("Wyświetlanie zdjęcia...")
-    #    text = Generate_description(
-    #    photo.description,photo.exif['Country'],
-    #    photo.exif['ShortDate'],
-    #    get_setting('opis', ''))
-    #    app.logger.info(f"Annotating image with text: {text}")        
-    #    #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
-    #    photo.annotate('South',40,text)
-    #    thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-    #    #thread_1 = threading.Thread(target=display_photo, args=(photo,))
-    #    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
-    #    thread_1.start()
-    #    thread_2.start()
-
-    # Optionally: redirect to a page showing full image
     return redirect('/')
 
 @app.route('/delete_image', methods=['POST'])

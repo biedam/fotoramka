@@ -39,9 +39,9 @@
         <div id="container">
           
       
-        <input type="radio" name="wyswietlanie"><label>Wyświetl losowo</label>
-        <input type="radio" name="wyswietlanie"><label>Wyświetl po kolei</label>
-        <input type="radio" name="wyswietlanie"><label>Wyświetl jedno zdjęcie</label>
+        <input type="radio" name="disp" value="random" {% if settings['disp'] == 'random' %}checked{% endif %}><label>Wyświetl losowo</label>
+<!--       <input type="radio" name="disp" value="sequence" {% if settings['disp'] == 'sequence' %}checked{% endif %}><label>Wyświetl po kolei</label> -->
+        <input type="radio" name="disp" value="none" {% if settings['disp'] == 'none' %}checked{% endif %}><label>Wyświetl jedno zdjęcie</label>
           
         </div>
         
@@ -50,17 +50,17 @@
         
          Jak Często Zmieniają Się Zdjęcia
       
-        <select name="kiedy" id="kiedy">
-        <option>raz na dzień</option>
-        <option>dwa razy na dzień</option>
-        <option>raz na 6 godzin</option>
+        <select name="freq" id="freq">
+        <option value="1" {% if settings['freq'] == '1' %}selected{% endif %}>raz na dzień</option>
+        <option value="2" {% if settings['freq'] == '2' %}selected{% endif %}>dwa razy na dzień</option>
+        <option value="4" {% if settings['freq'] == '4' %}selected{% endif %}>raz na 6 godzin</option>
         </select>
         <br>
         <br>
-        <input type="checkbox" />
+<!--        <input type="checkbox" />
         Zmieniaj zdjęcia w nocy
         <br>
-        <br>
+        <br> -->
         
         Opis zdjęcia
       
