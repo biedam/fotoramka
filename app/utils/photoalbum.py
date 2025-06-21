@@ -1,3 +1,12 @@
+#=============================================================================
+#============================ FOTORAMKA project ==============================
+#=============================================================================
+# author            : biedam
+# notes             : 
+# license           : MIT
+#=============================================================================
+
+
 from peewee import SqliteDatabase, Model, CharField, IntegerField, TextField, fn
 from pathlib import Path
 from utils.photo import Photo, Orientation

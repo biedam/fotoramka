@@ -1,3 +1,11 @@
+#=============================================================================
+#============================ FOTORAMKA project ==============================
+#=============================================================================
+# author            : biedam
+# notes             : 
+# license           : MIT
+#=============================================================================
+
 from flask import Flask, render_template, request, jsonify, redirect, flash
 from pathlib import Path
 import os
@@ -12,6 +20,10 @@ from utils.settings import set_setting, get_setting, init_setting
 
 #logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.INFO)
 logging.basicConfig(format='[%(asctime)s] %(levelname)s in %(module)s: %(message)s', level=logging.DEBUG)
+
+#=============================================================================
+#============================== Flask config =================================
+#=============================================================================
 
 
 app = Flask(__name__)
@@ -32,6 +44,10 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 init_setting()
 
+#=============================================================================
+#============================ Helper functions ===============================
+#=============================================================================
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -48,7 +64,9 @@ def process_file(img):
     app.logger.info('Add to database')
     Album.add(img)
 
-#================= Functions to display image ==================
+#=============================================================================
+#====================== Functions to display image ===========================
+#=============================================================================
 
 def Generate_description(description, country, short_date, content = 'desc_date'):
     if content == 'desc_date':
@@ -96,7 +114,10 @@ def display_photo(photo):
     thread_1.start()
     thread_2.start()
 
-#================= Display scheduler functions ==================
+#=============================================================================
+#====================== Display scheduler functions ==========================
+#=============================================================================
+
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 
@@ -116,7 +137,6 @@ def scheduled_image_update():
     else:
         app.logger.info('no photo change')
 
-    
 
 scheduler.add_job(
     scheduled_image_update, 
@@ -142,6 +162,10 @@ def scheduler_update(freq):
         app.logger.info(f"Scheduler rescheduled to following hours: {hours}")
     except Exception as e:
         return app.logger.error(str(e))
+
+#=============================================================================
+#====================== Flask app functions ==================================
+#=============================================================================
 
 @app.route('/')
 def index():
