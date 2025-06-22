@@ -158,7 +158,7 @@ def scheduler_update(freq):
 
     try:
         job_id ='image_update'
-        scheduler.reschedule_job(job_id, trigger='cron', hour=hours, minute=52 )
+        scheduler.reschedule_job(job_id, trigger='cron', hour=hours, minute=0 )
         app.logger.info(f"Scheduler rescheduled to following hours: {hours}")
     except Exception as e:
         return app.logger.error(str(e))

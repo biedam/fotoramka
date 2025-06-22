@@ -64,7 +64,7 @@ def img_resize(file_path):
     start_time = time.time()
     img = Photo(file_path)
     orient = img.resize(target_width = 640, target_height = 480, thumbnail = True)
-    orient = img.resize("resized.jpg")
+    orient = img.resize("resized.jpg", target_width = 800, target_height = 600)
     #orient = img.resize(file_path)
     end_time = time.time()
     elapsed_time = end_time - start_time
@@ -149,7 +149,7 @@ def main():
     parser.add_argument('-resize', action='store_true', help='Resize and crop the image')
     parser.add_argument('-exif', action='store_true', help='Get image EXIF data')
     parser.add_argument('-angle', action='store_true', help='Get frame orientation')
-    parser.add_argument('-rotate', type=str, help='Rotate frame')
+    parser.add_argument('-rotate', type=str, help='Rotate frame, usage -rotate H (horizontal) or V (vertical)')
     parser.add_argument('-add', type=str, help='Add picture to database usage: -add description -f path')
     parser.add_argument('-initdb', action='store_true', help='Initialise database')
     parser.add_argument('-listdb', action='store_true', help='List database')
