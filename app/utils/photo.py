@@ -159,6 +159,10 @@ class Photo:
                         country_name = country_code
                 except:
                     country_name = country_code
+
+            else:
+                #if there is no GPS data
+                country_name = None
             
             # ✅ Format date in Polish
             date_string = exif.get("DateTime")  # format: "2025:05:01 14:32:00"

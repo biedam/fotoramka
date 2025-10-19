@@ -65,25 +65,39 @@ class Frame:
         #print(f"Angle: {angle}")
         return angle
 
+    def orientation_avg(self):
+        average=0
+        n=10
+        for i in range(n):
+            average += self.orientation()
+        
+        return average/n
+
     def rotate(self, direction):
         #in horizontal position angle = 0 in vertical position angle = 90
         #servo = 1400 -> rotation from vertical to horizontal
         #servo = 1520 -> rotation from horizontal to vertical
+        time.sleep(1)
         gpio = pigpio.pi()
         gpio.set_mode(SERVO_GPIO, pigpio.OUTPUT)
         logger.info(f"Rotating to {direction}")
         if direction == Orientation.VERTICAL:
             while self.orientation() < VERTICAL_ANGLE:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, HOR_TO_VERT_SRV)
-                time.sleep(0.001)
+                #time.sleep(0.005)
+            while self.orientation() < VERTICAL_ANGLE:
+                gpio.set_servo_pulsewidth(SERVO_GPIO, HOR_TO_VERT_SRV)
         elif direction == Orientation.HORIZONTAL:
             while self.orientation() > HORIZONTAL_ANGLE:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, VERT_TO_HOR_SRV)
-                time.sleep(0.001)
+            while self.orientation() > HORIZONTAL_ANGLE:
+                gpio.set_servo_pulsewidth(SERVO_GPIO, VERT_TO_HOR_SRV)
+                #time.sleep(0.005)
 
         gpio.set_servo_pulsewidth(SERVO_GPIO, STOP_SRV)  # middle position
         gpio.set_servo_pulsewidth(SERVO_GPIO, 0)
         gpio.stop()
+        time.sleep(0.01)
         logger.info(f"angle = {self.orientation()}")
 
 

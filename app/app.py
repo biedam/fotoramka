@@ -95,24 +95,31 @@ def display_photo_runner(photo):
         app.logger.info('End display photo')
 
 def display_photo(photo):
-    app.logger.info(f"Displaying photo: {photo.image_path}")
-    print(f"[{dt.now()}] Displaying photo: {photo.image_path}, {photo.description}")
-    photo.set_palette(photo.PALETTE2)
-    frm = Frame()
-    #photo.dither(90)
-    angle = photo.orientation
-    text = Generate_description(
-        photo.description,photo.exif['Country'],
-        photo.exif['ShortDate'],
-        get_setting('opis', ''))
-    app.logger.info(f"Annotating image with text: {text}")        
-    #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
-    photo.annotate('South',40,text)
+    app.logger.info('Start display photo')
+    with display_lock:
+        app.logger.info(f"Displaying photo: {photo.image_path}")
+        print(f"[{dt.now()}] Displaying photo: {photo.image_path}, {photo.description}")
+        photo.set_palette(photo.PALETTE2)
+        frm = Frame()
+        #photo.dither(90)
+        angle = photo.orientation
+        text = Generate_description(
+            photo.description,photo.exif['Country'],
+            photo.exif['ShortDate'],
+            get_setting('opis', ''))
+        app.logger.info(f"Annotating image with text: {text}")        
+        #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
+        photo.annotate('South',40,text)
         #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-    thread_1 = threading.Thread(target=display_photo_runner, args=(photo,))
-    thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
-    thread_1.start()
-    thread_2.start()
+        thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+        thread_2.start()
+        photo.display(photo.processing_path)
+        #frm.rotate(angle)
+        app.logger.info('End display photo')
+    #thread_1 = threading.Thread(target=display_photo_runner, args=(photo,))
+    #thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+    #thread_1.start()
+    #thread_2.start()
 
 #=============================================================================
 #====================== Display scheduler functions ==========================
@@ -268,7 +275,9 @@ def display_image():
         flash("Fotoramka jest zajęta wyświetlaniem zdjęcia! Spróbuj później.")
     else:
         flash("Wyświetlanie zdjęcia...")
-        display_photo(photo)
+        thread = threading.Thread(target=display_photo, args=(photo,))
+        thread.start()
+        #display_photo(photo)
 
     return redirect('/')
 

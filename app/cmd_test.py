@@ -78,7 +78,8 @@ def img_get_exif(file_path):
 
 def orientation():
     frm = Frame()
-    logging.info(f"angle = {frm.orientation()}")
+    #logging.info(f"angle = {frm.orientation()}")
+    logging.info(f"angle = {frm.orientation_avg()}")
 
 def rotate(direction):
     frm = Frame()
