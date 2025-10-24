@@ -23,8 +23,8 @@ I2C_BUS         = 0x01             #default use I2C1
 IMU_ADDRESS     = 0x19             #sensor address 1
 SERVO_GPIO      = 12               #GPIO with PWM: 12,13,18,19
 
-VERTICAL_ANGLE = 90
-HORIZONTAL_ANGLE = 0
+VERTICAL_ANGLE = 89
+HORIZONTAL_ANGLE = 1
 VERT_TO_HOR_SRV = 1400
 HOR_TO_VERT_SRV = 1570
 STOP_SRV = 1460
@@ -82,13 +82,14 @@ class Frame:
         gpio.set_mode(SERVO_GPIO, pigpio.OUTPUT)
         logger.info(f"Rotating to {direction}")
         if direction == Orientation.VERTICAL:
-            while self.orientation() < VERTICAL_ANGLE:
+            while self.orientation() < VERTICAL_ANGLE-0.5:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, HOR_TO_VERT_SRV)
+                #logger.info(f"a {self.orientation()}")
                 #time.sleep(0.005)
             while self.orientation() < VERTICAL_ANGLE:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, HOR_TO_VERT_SRV)
         elif direction == Orientation.HORIZONTAL:
-            while self.orientation() > HORIZONTAL_ANGLE:
+            while self.orientation() > HORIZONTAL_ANGLE+0.5:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, VERT_TO_HOR_SRV)
             while self.orientation() > HORIZONTAL_ANGLE:
                 gpio.set_servo_pulsewidth(SERVO_GPIO, VERT_TO_HOR_SRV)

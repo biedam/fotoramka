@@ -111,10 +111,12 @@ def display_photo(photo):
         #text = f"{photo.description}, {photo.exif['Country']}, {photo.exif['ShortDate']}"
         photo.annotate('South',40,text)
         #thread_1 = threading.Thread(target=photo.display, args=(photo.processing_path,))
-        thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
-        thread_2.start()
+
+        #thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
+        #thread_2.start()
+
         photo.display(photo.processing_path)
-        #frm.rotate(angle)
+        frm.rotate(angle)
         app.logger.info('End display photo')
     #thread_1 = threading.Thread(target=display_photo_runner, args=(photo,))
     #thread_2 = threading.Thread(target=frm.rotate, args=(angle,))
