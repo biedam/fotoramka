@@ -132,16 +132,35 @@ import atexit
 
 scheduler = BackgroundScheduler()
 
+display_index = 0
+photo_table = []
+# TODO move display index to Album
+
 def scheduled_image_update():
     app.logger.info('==============================')
     app.logger.info('Scheduled Image update')
     app.logger.info('==============================')
     print(f"[{dt.now()}] Scheduled Image update")
     disp_setting = get_setting('disp', '')
+    global display_index
+    global photo_table
 
     if disp_setting == 'random':
         app.logger.info('display rantom photo')
         photo = Album.get_random()
+        display_photo(photo)
+    elif disp_setting == 'shuffle':
+        if display_index == 0:
+            photo_table = Album.shuffle()
+            app.logger.info(f'Photo shuffle {photo_table}')
+            
+        photo = Album.get_byid(photo_table[display_index])
+        app.logger.info(f'Displaying photo id {photo_table[display_index]} with current index {display_index}')
+
+        display_index += 1
+        if display_index == len(photo_table):
+            display_index = 0
+
         display_photo(photo)
     else:
         app.logger.info('no photo change')
@@ -154,6 +173,13 @@ scheduler.add_job(
     minute=0, 
     id='image_update', 
     replace_existing=True)
+
+#scheduler.add_job(
+#    scheduled_image_update, 
+#    'interval', 
+#    minutes=3, 
+#    id='image_update', 
+#    replace_existing=True)
 
 def scheduler_update(freq):
 

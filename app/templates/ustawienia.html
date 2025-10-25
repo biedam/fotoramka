@@ -39,7 +39,8 @@
         <div id="container">
           
       
-        <input type="radio" name="disp" value="random" {% if settings['disp'] == 'random' %}checked{% endif %}><label>Wyświetl losowo</label>
+        <input type="radio" name="disp" value="random" {% if settings['disp'] == 'random' %}checked{% endif %}><label>Losowe zdjęcie</label>
+        <input type="radio" name="disp" value="shuffle" {% if settings['disp'] == 'shuffle' %}checked{% endif %}><label>Losowa kolejność</label>
 <!--       <input type="radio" name="disp" value="sequence" {% if settings['disp'] == 'sequence' %}checked{% endif %}><label>Wyświetl po kolei</label> -->
         <input type="radio" name="disp" value="none" {% if settings['disp'] == 'none' %}checked{% endif %}><label>Wyświetl jedno zdjęcie</label>
           

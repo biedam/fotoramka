@@ -126,7 +126,12 @@ def list_database():
         print(f"photo number: {image.Photo_order}, ID: {image.id}, PATH: {image.Resized_path}, name: {image.Original_filename}" +
             f", desc: {image.Photo_description}, {image.LongDate}, {image.Date}")
     print("==================================================================")
-    
+
+def shuffle():
+    album = PhotoAlbum()
+    print(album.shuffle())
+
+
 def display_byid(photo_id):
     album = PhotoAlbum()
     frm = Frame()
@@ -158,6 +163,7 @@ def main():
     parser.add_argument('-deldb', type=int, help='Delete DB item by ID')
     parser.add_argument('-dispdb', type=int, help='Display DB item by ID')
     parser.add_argument('-adddate', type=str, help='Add date to DB item, usage -adddate 2025:01:01 -getdb ID')
+    parser.add_argument('-shuffle', action='store_true', help='Test shuffle function')
 
     args = parser.parse_args()
 
@@ -204,6 +210,8 @@ def main():
                 album.remove(args.deldb)
     elif args.dispdb:
         display_byid(args.dispdb)
+    elif args.shuffle:
+        shuffle()
     else:
         parser.print_help()
 

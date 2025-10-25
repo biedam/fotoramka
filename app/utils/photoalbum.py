@@ -130,6 +130,10 @@ class PhotoAlbum:
         logging.info(f"Selected random photo with ID: {random_entry}")
         return self.get_byid(random_entry.id)
 
+    def shuffle(self):
+        random_order = PhotoData.select().order_by(fn.Random())
+        return [item.id for item in random_order]
+
     def add_date(self, image_id, date):
         try:
             image = PhotoData.get_by_id(image_id)
