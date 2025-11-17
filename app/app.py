@@ -167,20 +167,20 @@ def scheduled_image_update():
         app.logger.info('no photo change')
 
 
-#scheduler.add_job(
-#    scheduled_image_update, 
-#    'cron', 
-#    hour='0,12', 
-#    minute=0, 
-#    id='image_update', 
-#    replace_existing=True)
-
 scheduler.add_job(
     scheduled_image_update, 
-    'interval', 
-    minutes=3, 
+    'cron', 
+    hour='0,12', 
+    minute=0, 
     id='image_update', 
     replace_existing=True)
+
+#scheduler.add_job(
+#    scheduled_image_update, 
+#    'interval', 
+#    minutes=3, 
+#    id='image_update', 
+#    replace_existing=True)
 
 def scheduler_update(freq):
 
