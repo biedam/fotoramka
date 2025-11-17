@@ -49,10 +49,16 @@ def initdb():
 
 
 class PhotoAlbum:
+    shuffle_table = []
+    shuffle_index = 0
+
     def add(self, photo):
         # Get current max sort_order (returns None if DB is empty)
         cur_photo_index = PhotoData.select(fn.MAX(PhotoData.Photo_order)).scalar() or 0
         
+        #reset shuffle upon adding photo
+        self.shuffle_index = 0
+
         PhotoData.create(
             Photo_order = cur_photo_index + 1,
             Original_filename = photo.filename,
@@ -80,6 +86,9 @@ class PhotoAlbum:
 
             image.delete_instance()
             logging.info(f"image with ID {image_id} deleted")
+
+            #reset shuffle upon photo delete
+            self.shuffle_index = 0
         except ImageData.DoesNotExist:
             logging.warning(f"Image id {image_id} not in database")
         #delete also files from disk
@@ -130,9 +139,20 @@ class PhotoAlbum:
         logging.info(f"Selected random photo with ID: {random_entry}")
         return self.get_byid(random_entry.id)
 
-    def shuffle(self):
-        random_order = PhotoData.select().order_by(fn.Random())
-        return [item.id for item in random_order]
+    def get_shuffle(self):
+        if self.shuffle_index == 0:
+            random_order = PhotoData.select().order_by(fn.Random())
+            self.shuffle_table = [item.id for item in random_order]
+            logging.info(f'Schuffling photos {self.shuffle_table}')
+
+        photo_id = self.get_byid(self.shuffle_table[self.shuffle_index])
+        logging.info(f'Displaying photo id {photo_id} with current index {self.shuffle_index}')
+
+        self.shuffle_index += 1
+        if self.shuffle_index == len(self.shuffle_table):
+            self.shuffle_index = 0
+        
+        return photo_id
 
     def add_date(self, image_id, date):
         try:

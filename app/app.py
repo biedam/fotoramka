@@ -132,8 +132,8 @@ import atexit
 
 scheduler = BackgroundScheduler()
 
-display_index = 0
-photo_table = []
+#display_index = 0
+#photo_table = []
 # TODO move display index to Album
 
 def scheduled_image_update():
@@ -150,36 +150,37 @@ def scheduled_image_update():
         photo = Album.get_random()
         display_photo(photo)
     elif disp_setting == 'shuffle':
-        if display_index == 0:
-            photo_table = Album.shuffle()
-            app.logger.info(f'Photo shuffle {photo_table}')
+        #if display_index == 0:
+        #    photo_table = Album.shuffle()
+        #    app.logger.info(f'Photo shuffle {photo_table}')
             
-        photo = Album.get_byid(photo_table[display_index])
-        app.logger.info(f'Displaying photo id {photo_table[display_index]} with current index {display_index}')
+        #photo = Album.get_byid(photo_table[display_index])
+        #app.logger.info(f'Displaying photo id {photo_table[display_index]} with current index {display_index}')
 
-        display_index += 1
-        if display_index == len(photo_table):
-            display_index = 0
-
+        #display_index += 1
+        #if display_index == len(photo_table):
+        #    display_index = 0
+        app.logger.info('display schuffled photo')
+        photo = Album.get_shuffle()
         display_photo(photo)
     else:
         app.logger.info('no photo change')
 
 
-scheduler.add_job(
-    scheduled_image_update, 
-    'cron', 
-    hour='0,12', 
-    minute=0, 
-    id='image_update', 
-    replace_existing=True)
-
 #scheduler.add_job(
 #    scheduled_image_update, 
-#    'interval', 
-#    minutes=3, 
+#    'cron', 
+#    hour='0,12', 
+#    minute=0, 
 #    id='image_update', 
 #    replace_existing=True)
+
+scheduler.add_job(
+    scheduled_image_update, 
+    'interval', 
+    minutes=3, 
+    id='image_update', 
+    replace_existing=True)
 
 def scheduler_update(freq):
 
