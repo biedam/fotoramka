@@ -189,8 +189,15 @@ def scheduler_update(freq):
     elif freq == '2':
         hours = '0,12'
     elif freq == '4':
-    # do not update photo at night time (0AM - 6AM)
+    # do not update photo at night time (0AM - 7AM)
         hours = '0,12,18'
+    elif freq == '12':
+    # do not update photo at night time (0AM - 7AM)
+        hours = '0,8,10,12,14,16,18,20,22'
+    elif freq == '24':
+    # do not update photo at night time (0AM - 7AM)
+        hours = '0,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23'
+        
 
     try:
         job_id ='image_update'
